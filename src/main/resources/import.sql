@@ -1,0 +1,21 @@
+INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000001', 'Cardiologia', 'Especialidade responsável pelo diagnóstico e tratamento de doenças do coração e sistema cardiovascular.', 'https://www.clinicasalute.com.br/upload/service/H44iBhjj04GNo8o6AiDauoRfXuwyRzzfD66eXeVK.jpeg');
+INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000002', 'Dermatologia', 'Especialidade voltada para prevenção, diagnóstico e tratamento de doenças da pele.', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQvFQAEPqdO_Da6nfB1FI9WhEX_D5zDv2bw4bP-fVpHhflkysPQ0Sz5UE&s=10');
+INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000003', 'Pediatria', 'Especialidade médica dedicada ao acompanhamento da saúde de crianças e adolescentes.', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVLlP_i_tn7-m2MiA71XxEpSDiqoA9IUsUZqGXjv615A&s=10');
+INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000004', 'Ortopedia', 'Especialidade responsável pelo tratamento de ossos, músculos, articulações e ligamentos.', 'https://multimedical.com.br/wp-content/uploads/2022/10/ortopedia.png');
+INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000005', 'Neurologia', 'Especialidade que trata doenças do sistema nervoso central e periférico.', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQY9oxPEkYFQizDTU23imwwziPJzRW49TWZHJDVEvEEhZtZvsVSHKlkkQw&s=10');
+INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000006', 'Oftalmologia', 'Especialidade voltada para o cuidado da visão e tratamento dos olhos.', 'https://oftalmocitta.com.br/wp-content/uploads/2025/07/oftalmologia-geral.webp');
+INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000007', 'Ginecologia', 'Especialidade dedicada à saúde do sistema reprodutor feminino.', 'https://femmesante.com.br/wp-content/uploads/2023/10/femmesante-ginecologia.jpg');
+INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000008', 'Psiquiatria', 'Especialidade focada na prevenção, diagnóstico e tratamento de transtornos mentais.', 'https://images.unsplash.com/photo-1573497620053-ea5300f94f21');
+INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000009', 'Endocrinologia', 'Especialidade responsável pelo tratamento de distúrbios hormonais e metabólicos.', 'https://images.unsplash.com/photo-1579684385127-1ef15d508118');
+INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000010', 'Urologia', 'Especialidade que trata doenças do trato urinário e sistema reprodutor masculino.', 'https://feliciorocho.org.br/media/219/urologia.jpg');
+
+
+INSERT INTO tb_usuarios (id, nome, email, senha, tipo_usuario, foto) VALUES ('4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21', 'Lionel Messi', 'c@1', '1234', 'paciente', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTthxRTShuP03QGk9Z0z3hnm6C2v9DgRpnYyBRpOAdXFfTo277jXCVVFXU&s=10');
+INSERT INTO tb_pacientes (usuario_id) VALUES ('4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21');
+
+INSERT INTO tb_usuarios (id, nome, email, senha, tipo_usuario, foto) VALUES ('bdfc1043-b7bc-413b-8a11-80348a9936a4', 'Marcelo Balbino', 'm@g', '1234', 'medico', 'https://medicinasa.com.br/wp-content/uploads/2023/03/medico-hospital-esteto-2-850x560.jpg');
+INSERT INTO tb_medicos (usuario_id, crm, uf_emissao, sobre_mim, formacao_academica) VALUES ('bdfc1043-b7bc-413b-8a11-80348a9936a4', '123456-SP', 'SP', 'Médico com ampla experiência em teleconsultas.', 'Graduação pela USP (2017) - Pós graduação pela UNICAMP (2020) - Mestrado pela UFMG (2025)');
+
+INSERT INTO tb_medicos_especialidades (id, medico_id, especialidade_id) VALUES ('a7b3c2e1-8f49-410a-bd62-59c8d17a3f5b', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', 'e1000000-0000-0000-0000-000000000007');
+
+INSERT INTO tb_horarios(id, medico_id, dia, manha, tarde, noite) VALUES ('adaj-adawda-121d21d1-afatq3f', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', 'segunda', 1, 0, 1)
