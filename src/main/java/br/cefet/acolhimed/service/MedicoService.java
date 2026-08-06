@@ -50,7 +50,7 @@ public class MedicoService {
         Medico medico = new Medico();
         medico.setNome(dto.getNome());
         medico.setEmail(dto.getEmail());
-        medico.setSenha(medico.getSenha());
+        medico.setSenha(dto.getSenha());
         medico.setTipoUsuario(TipoUsuario.medico);
         medico.setUfEmissao(dto.getUfEmissao());
         medico.setCrm(dto.getCrm());
@@ -83,7 +83,7 @@ public class MedicoService {
         // senha - atualizar apenas se providenciado
         String senha = dto.getSenha();
         if (senha != null && !senha.trim().isEmpty()) {
-            medico.setSenha(medico.getSenha());
+            medico.setSenha(senha);
         }
         medico.setSobreMim(dto.getSobreMim());
         medico.setFormacaoAcademica(dto.getFormacaoAcademica());
