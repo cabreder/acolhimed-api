@@ -28,6 +28,7 @@ import com.google.auth.oauth2.ClientId;
 import com.google.auth.oauth2.DefaultPKCEProvider;
 import com.google.auth.oauth2.TokenStore;
 import com.google.auth.oauth2.UserAuthorizer;
+import com.google.auth.oauth2.UserCredentials;
 
 @Service
 public class GoogleMeetService {
@@ -40,6 +41,11 @@ public class GoogleMeetService {
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
 
     private static final String USER = "default";
+
+    private String getEnv(String name) {
+        String value = System.getenv(name);
+        return value == null || value.isBlank() ? null : value;
+    }
 
     private static final TokenStore TOKEN_STORE = new TokenStore() {
 
@@ -135,6 +141,22 @@ public class GoogleMeetService {
     }
 
     private Credentials getCredentials() throws Exception {
+        String clientId = getEnv("GOOGLE_CLIENT_ID");
+        String clientSecret = getEnv("GOOGLE_CLIENT_SECRET");
+        String refreshToken = getEnv("GOOGLE_REFRESH_TOKEN");
+
+        if (clientId != null && clientSecret != null && refreshToken != null) {
+            return UserCredentials.newBuilder()
+                    .setClientId(clientId)
+                    .setClientSecret(clientSecret)
+                    .setRefreshToken(refreshToken)
+                    .build();
+        }
+
+        if (!"true".equalsIgnoreCase(getEnv("GOOGLE_ALLOW_LOCAL_OAUTH"))) {
+            throw new IllegalStateException(
+                    "Configure GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET e GOOGLE_REFRESH_TOKEN para criar reuniões do Google Meet.");
+        }
 
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().build();
 
