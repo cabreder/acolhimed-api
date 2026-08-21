@@ -18,6 +18,7 @@ public class ConsultaResponseDTO {
     private String especialidadeId;
     private String especialidadeNome;
     private StatusConsulta status;
+    private String linkConsulta;
 
     public ConsultaResponseDTO(Consulta consulta) {
         this.id = consulta.getId();
@@ -30,5 +31,6 @@ public class ConsultaResponseDTO {
         this.especialidadeId = consulta.getEspecialidade().getId();
         this.especialidadeNome = consulta.getEspecialidade().getNome();
         this.status = consulta.getStatus();
+        this.linkConsulta = consulta.getLinkConsulta();
     }
 }

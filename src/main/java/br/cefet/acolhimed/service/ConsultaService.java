@@ -36,6 +36,9 @@ public class ConsultaService {
     @Autowired
     private EspecialidadeRepository especialidadeRepository;
 
+    @Autowired
+    private GoogleMeetService googleMeetService;
+
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listar() {
         return consultaRepository.findAll().stream().map(ConsultaResponseDTO::new).toList();
@@ -59,13 +62,16 @@ public class ConsultaService {
     @Transactional
     public ConsultaResponseDTO inserir(ConsultaRequestDTO dto) {
         Medico medico = medicoRepository.findById(dto.getMedico().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Medico nao encontrado. Id: " + dto.getMedico().getId()));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Medico nao encontrado. Id: " + dto.getMedico().getId()));
 
         Paciente paciente = pacienteRepository.findById(dto.getPaciente().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Paciente nao encontrado. Id: " + dto.getPaciente().getId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Paciente nao encontrado. Id: " + dto.getPaciente().getId()));
 
         Especialidade especialidade = especialidadeRepository.findById(dto.getEspecialidade().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Especialidade nao encontrada. Id: " + dto.getEspecialidade().getId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Especialidade nao encontrada. Id: " + dto.getEspecialidade().getId()));
 
         validarHorarioDisponivel(medico, dto.getDataHora());
 
@@ -75,6 +81,15 @@ public class ConsultaService {
         consulta.setEspecialidade(especialidade);
         consulta.setMotivoCancelamento("");
         consulta.setDataHora(dto.getDataHora());
+
+        String link;
+        try {
+            link = googleMeetService.criarReuniao();
+        } catch (Exception e) {
+            throw new RuntimeException("Não foi possível criar a reunião do Google Meet.", e);
+        }
+
+        consulta.setLinkConsulta(link);
         consulta.setStatus(StatusConsulta.agendada);
 
         return new ConsultaResponseDTO(consultaRepository.save(consulta));
