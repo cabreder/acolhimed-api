@@ -29,19 +29,19 @@ public class AvaliacaoController {
     private AvaliacaoService avaliacaoService;
 
     @GetMapping("/{medicoId}")
-    public ResponseEntity<List<AvaliacaoResponseDTO>> getEspecialidadesDoMedico(@PathVariable String medicoId) {
+    public ResponseEntity<List<AvaliacaoResponseDTO>> getAvaliacoesDoMedico(@PathVariable String medicoId) {
         return ResponseEntity.ok(avaliacaoService.buscarPorMedico(medicoId));
     }
 
     @PostMapping
-    @Operation(summary = "Cadastrar Consulta")
+    @Operation(summary = "Cadastrar avaliação")
     public ResponseEntity<AvaliacaoResponseDTO> inserir(@Valid @RequestBody AvaliacaoRequestDTO avaliacaoRequestDTO) {
         AvaliacaoResponseDTO avaliacaoResponseDTO = avaliacaoService.inserir(avaliacaoRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(avaliacaoResponseDTO);
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir Consulta")
+    @Operation(summary = "Excluir avaliação")
     public ResponseEntity<Void> excluir(@PathVariable String id) {
         avaliacaoService.excluir(id);
         return ResponseEntity.noContent().build();

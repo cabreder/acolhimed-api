@@ -22,7 +22,11 @@ public class AvaliacaoService {
 
     @Autowired
     private AvaliacaoRepository avaliacaoRepository;
+
+    @Autowired
     private MedicoRepository medicoRepository;
+
+    @Autowired
     private PacienteRepository pacienteRepository;
 
     @Transactional
@@ -32,11 +36,11 @@ public class AvaliacaoService {
             throw new BusinessException("A nota deve ser entre 1 a 5");
         }
 
-        if (medicoRepository.existsById(dto.getConsulta().getMedico().getId())) {
+        if (!medicoRepository.existsById(dto.getConsulta().getMedico().getId())) {
             throw new BusinessException("Paciente não encontrado. Id: " + dto.getConsulta().getMedico().getId());
         }
 
-        if (pacienteRepository.existsById(dto.getConsulta().getPaciente().getId())) {
+        if (!pacienteRepository.existsById(dto.getConsulta().getPaciente().getId())) {
             throw new BusinessException("Paciente não encontrado. Id: " + dto.getConsulta().getPaciente().getId());
         }
 
@@ -64,7 +68,7 @@ public class AvaliacaoService {
         Medico medico = medicoRepository.findById(medicoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Médico não encontrado. Id: " + medicoId));
 
-        return avaliacaoRepository.findByMedico(medico)
+        return avaliacaoRepository.findByConsultaMedico(medico)
                 .stream()
                 .map(AvaliacaoResponseDTO::new)
                 .toList();

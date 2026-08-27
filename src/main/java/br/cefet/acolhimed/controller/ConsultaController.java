@@ -15,9 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.cefet.acolhimed.dto.ConsultaRequestDTO;
 import br.cefet.acolhimed.dto.ConsultaResponseDTO;
-import br.cefet.acolhimed.dto.UsuarioResponseDTO;
 import br.cefet.acolhimed.service.ConsultaService;
-import br.cefet.acolhimed.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
