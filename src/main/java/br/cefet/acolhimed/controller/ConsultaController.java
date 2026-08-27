@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.cefet.acolhimed.dto.ConsultaRequestDTO;
 import br.cefet.acolhimed.dto.ConsultaResponseDTO;
+import br.cefet.acolhimed.dto.UsuarioResponseDTO;
 import br.cefet.acolhimed.service.ConsultaService;
+import br.cefet.acolhimed.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -35,11 +37,18 @@ public class ConsultaController {
         return ResponseEntity.ok(consultas);
     }
 
-    @GetMapping("/{usuarioId}")
+    @GetMapping("/usuario/{usuarioId}")
     @Operation(summary = "Listar Consultas do Usuario")
     public ResponseEntity<List<ConsultaResponseDTO>> listarPorUsuario(@PathVariable String usuarioId) {
         List<ConsultaResponseDTO> consultas = consultaService.listarConsultasDoUsuario(usuarioId);
         return ResponseEntity.ok(consultas);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar consulta por ID")
+    public ResponseEntity<ConsultaResponseDTO> buscarPorId(@PathVariable String id) {
+        ConsultaResponseDTO consultaResponseDTO = consultaService.buscarPorId(id);
+        return ResponseEntity.ok(consultaResponseDTO);
     }
 
     @PostMapping

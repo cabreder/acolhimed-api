@@ -9,10 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.cefet.acolhimed.dto.ConsultaRequestDTO;
 import br.cefet.acolhimed.dto.ConsultaResponseDTO;
+import br.cefet.acolhimed.dto.MedicoResponseDTO;
+import br.cefet.acolhimed.dto.UsuarioResponseDTO;
 import br.cefet.acolhimed.entity.Consulta;
 import br.cefet.acolhimed.entity.Especialidade;
 import br.cefet.acolhimed.entity.Medico;
 import br.cefet.acolhimed.entity.Paciente;
+import br.cefet.acolhimed.entity.Usuario;
 import br.cefet.acolhimed.enums.StatusConsulta;
 import br.cefet.acolhimed.exception.BusinessException;
 import br.cefet.acolhimed.exception.ResourceNotFoundException;
@@ -59,6 +62,15 @@ public class ConsultaService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public ConsultaResponseDTO buscarPorId(String id) {
+        Consulta consulta = consultaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Consulta não encontrada. Id: " + id));
+    
+
+        return new ConsultaResponseDTO(consulta);
+    }
+
     @Transactional
     public ConsultaResponseDTO inserir(ConsultaRequestDTO dto) {
         Medico medico = medicoRepository.findById(dto.getMedico().getId())
@@ -79,6 +91,7 @@ public class ConsultaService {
         consulta.setMedico(medico);
         consulta.setPaciente(paciente);
         consulta.setEspecialidade(especialidade);
+        consulta.setObservacoes(dto.getObservacoes());
         consulta.setMotivoCancelamento("");
         consulta.setDataHora(dto.getDataHora());
 
@@ -165,4 +178,5 @@ public class ConsultaService {
             throw new BusinessException("Ja existe uma consulta para este medico neste horario.");
         }
     }
+
 }
