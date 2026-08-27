@@ -19,6 +19,7 @@ import br.cefet.acolhimed.entity.Usuario;
 import br.cefet.acolhimed.enums.StatusConsulta;
 import br.cefet.acolhimed.exception.BusinessException;
 import br.cefet.acolhimed.exception.ResourceNotFoundException;
+import br.cefet.acolhimed.exception.ValidationError;
 import br.cefet.acolhimed.repository.ConsultaRepository;
 import br.cefet.acolhimed.repository.EspecialidadeRepository;
 import br.cefet.acolhimed.repository.MedicoRepository;
@@ -109,7 +110,7 @@ public class ConsultaService {
     }
 
     @Transactional
-    public ConsultaResponseDTO cancelarConsulta(String id, ConsultaRequestDTO dto) {
+    public ConsultaResponseDTO cancelarConsulta(String id, String motivoCancelamento) {
         Consulta consulta = buscarConsulta(id);
 
         if (consulta.getStatus() == StatusConsulta.cancelada || consulta.getStatus() == StatusConsulta.finalizada) {
@@ -121,7 +122,11 @@ public class ConsultaService {
         }
 
         consulta.setStatus(StatusConsulta.cancelada);
-        consulta.setMotivoCancelamento(dto == null ? null : dto.getMotivoCancelamento());
+        if(!motivoCancelamento.isBlank() && motivoCancelamento != null){
+            consulta.setMotivoCancelamento(motivoCancelamento);
+        }else{
+            throw new BusinessException("O motivo do cancelamento não existe ou está nulo");
+        }
 
         return new ConsultaResponseDTO(consultaRepository.save(consulta));
     }

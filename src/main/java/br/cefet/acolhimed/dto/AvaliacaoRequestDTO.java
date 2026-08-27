@@ -2,7 +2,6 @@ package br.cefet.acolhimed.dto;
 
 import com.google.type.Date;
 
-import br.cefet.acolhimed.entity.Consulta;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -11,10 +10,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class AvaliacaoRequestDTO {
-     private String id;
+    private String id;
 
-    @NotNull(message = "O campo consulta é obrigatório")
-    private Consulta consulta;
+    @NotNull(message = "O campo consultaId é obrigatório")
+    private String consultaId;
 
     @NotBlank(message = "O campo comentário é obrigatório")
     private String comentario;

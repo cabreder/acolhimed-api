@@ -10,10 +10,12 @@ import br.cefet.acolhimed.dto.AvaliacaoRequestDTO;
 import br.cefet.acolhimed.dto.AvaliacaoResponseDTO;
 import br.cefet.acolhimed.dto.HorarioResponseDTO;
 import br.cefet.acolhimed.entity.Avaliacao;
+import br.cefet.acolhimed.entity.Consulta;
 import br.cefet.acolhimed.entity.Medico;
 import br.cefet.acolhimed.exception.BusinessException;
 import br.cefet.acolhimed.exception.ResourceNotFoundException;
 import br.cefet.acolhimed.repository.AvaliacaoRepository;
+import br.cefet.acolhimed.repository.ConsultaRepository;
 import br.cefet.acolhimed.repository.MedicoRepository;
 import br.cefet.acolhimed.repository.PacienteRepository;
 
@@ -29,6 +31,9 @@ public class AvaliacaoService {
     @Autowired
     private PacienteRepository pacienteRepository;
 
+    @Autowired
+    private ConsultaRepository consultaRepository;
+
     @Transactional
     public AvaliacaoResponseDTO inserir(AvaliacaoRequestDTO dto) {
 
@@ -36,19 +41,22 @@ public class AvaliacaoService {
             throw new BusinessException("A nota deve ser entre 1 a 5");
         }
 
-        if (!medicoRepository.existsById(dto.getConsulta().getMedico().getId())) {
-            throw new BusinessException("Paciente não encontrado. Id: " + dto.getConsulta().getMedico().getId());
+        Consulta consulta = consultaRepository.findById(dto.getConsultaId())
+                .orElseThrow(() -> new ResourceNotFoundException("Consulta não encontrada. Id: " + dto.getConsultaId()));
+
+        if (!medicoRepository.existsById(consulta.getMedico().getId())) {
+            throw new BusinessException("Paciente não encontrado. Id: " + consulta.getMedico().getId());
         }
 
-        if (!pacienteRepository.existsById(dto.getConsulta().getPaciente().getId())) {
-            throw new BusinessException("Paciente não encontrado. Id: " + dto.getConsulta().getPaciente().getId());
+        if (!pacienteRepository.existsById(consulta.getPaciente().getId())) {
+            throw new BusinessException("Paciente não encontrado. Id: " + consulta.getPaciente().getId());
         }
 
         Avaliacao avaliacao = new Avaliacao();
         avaliacao.setComentario(dto.getComentario());
         avaliacao.setData(dto.getData());
         avaliacao.setNota(dto.getNota());
-        avaliacao.setConsulta(dto.getConsulta());
+        avaliacao.setConsulta(consulta);
 
         return new AvaliacaoResponseDTO(avaliacaoRepository.save(avaliacao));
     }
