@@ -18,6 +18,12 @@ public interface ConsultaRepository extends JpaRepository<Consulta, String> {
 
     List<Consulta> findByMedicoOrPaciente(Medico medico, Paciente paciente);
 
+    Optional<Consulta> findFirstByPacienteIdAndDataHoraBetweenAndStatus(
+            String pacienteId,
+            LocalDateTime inicio,
+            LocalDateTime fim,
+            StatusConsulta status);
+
     boolean existsByMedicoAndDataHoraAndStatusNot(Medico medico, LocalDateTime dataHora, StatusConsulta status);
 
     boolean existsByMedicoAndDataHoraAndStatusNotAndIdNot(

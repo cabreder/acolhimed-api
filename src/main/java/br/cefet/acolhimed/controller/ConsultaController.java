@@ -50,6 +50,13 @@ public class ConsultaController {
         return ResponseEntity.ok(consultaResponseDTO);
     }
 
+    @GetMapping("/em_andamento/{id}")
+    @Operation(summary = "Buscar consulta por ID")
+    public ResponseEntity<ConsultaResponseDTO> buscarConsultaEmAndamento(@PathVariable String id) {
+        ConsultaResponseDTO consultaResponseDTO = consultaService.buscarConsultaEmAndamento(id);
+        return ResponseEntity.ok(consultaResponseDTO);
+    }
+
     @PostMapping
     @Operation(summary = "Cadastrar Consulta")
     public ResponseEntity<ConsultaResponseDTO> inserir(@Valid @RequestBody ConsultaRequestDTO consultaRequestDTO) {

@@ -9,17 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.cefet.acolhimed.dto.ConsultaRequestDTO;
 import br.cefet.acolhimed.dto.ConsultaResponseDTO;
-import br.cefet.acolhimed.dto.MedicoResponseDTO;
-import br.cefet.acolhimed.dto.UsuarioResponseDTO;
+
 import br.cefet.acolhimed.entity.Consulta;
 import br.cefet.acolhimed.entity.Especialidade;
 import br.cefet.acolhimed.entity.Medico;
 import br.cefet.acolhimed.entity.Paciente;
-import br.cefet.acolhimed.entity.Usuario;
 import br.cefet.acolhimed.enums.StatusConsulta;
 import br.cefet.acolhimed.exception.BusinessException;
 import br.cefet.acolhimed.exception.ResourceNotFoundException;
-import br.cefet.acolhimed.exception.ValidationError;
 import br.cefet.acolhimed.repository.ConsultaRepository;
 import br.cefet.acolhimed.repository.EspecialidadeRepository;
 import br.cefet.acolhimed.repository.MedicoRepository;
@@ -67,7 +64,24 @@ public class ConsultaService {
     public ConsultaResponseDTO buscarPorId(String id) {
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Consulta não encontrada. Id: " + id));
-    
+
+        return new ConsultaResponseDTO(consulta);
+    }
+
+    @Transactional(readOnly = true)
+    public ConsultaResponseDTO buscarConsultaEmAndamento(String usuarioId) {
+
+        LocalDateTime agora = LocalDateTime.now();
+        LocalDateTime limite = agora.plusMinutes(15);
+
+        Consulta consulta = consultaRepository
+                .findFirstByPacienteIdAndDataHoraBetweenAndStatus(
+                        usuarioId,
+                        agora,
+                        limite,
+                        StatusConsulta.agendada)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Nenhuma consulta nos próximos 15 minutos."));
 
         return new ConsultaResponseDTO(consulta);
     }
@@ -96,14 +110,18 @@ public class ConsultaService {
         consulta.setMotivoCancelamento("");
         consulta.setDataHora(dto.getDataHora());
 
-        String link;
-        try {
-            link = googleMeetService.criarReuniao();
-        } catch (Exception e) {
-            throw new RuntimeException("Não foi possível criar a reunião do Google Meet.", e);
-        }
+        /*
+         * String link;
+         * try {
+         * link = googleMeetService.criarReuniao();
+         * } catch (Exception e) {
+         * throw new
+         * RuntimeException("Não foi possível criar a reunião do Google Meet.", e);
+         * }
+         * consulta.setLinkConsulta(link);
+         * 
+         */
 
-        consulta.setLinkConsulta(link);
         consulta.setStatus(StatusConsulta.agendada);
 
         return new ConsultaResponseDTO(consultaRepository.save(consulta));
@@ -122,9 +140,9 @@ public class ConsultaService {
         }
 
         consulta.setStatus(StatusConsulta.cancelada);
-        if(!motivoCancelamento.isBlank() && motivoCancelamento != null){
+        if (!motivoCancelamento.isBlank() && motivoCancelamento != null) {
             consulta.setMotivoCancelamento(motivoCancelamento);
-        }else{
+        } else {
             throw new BusinessException("O motivo do cancelamento não existe ou está nulo");
         }
 
