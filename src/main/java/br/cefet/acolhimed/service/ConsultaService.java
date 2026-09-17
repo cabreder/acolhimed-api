@@ -15,12 +15,15 @@ import br.cefet.acolhimed.entity.Especialidade;
 import br.cefet.acolhimed.entity.Medico;
 import br.cefet.acolhimed.entity.Paciente;
 import br.cefet.acolhimed.enums.StatusConsulta;
+import br.cefet.acolhimed.enums.TipoNotificacao;
 import br.cefet.acolhimed.exception.BusinessException;
 import br.cefet.acolhimed.exception.ResourceNotFoundException;
 import br.cefet.acolhimed.repository.ConsultaRepository;
 import br.cefet.acolhimed.repository.EspecialidadeRepository;
 import br.cefet.acolhimed.repository.MedicoRepository;
 import br.cefet.acolhimed.repository.PacienteRepository;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Service
 public class ConsultaService {
@@ -40,6 +43,9 @@ public class ConsultaService {
     @Autowired
     private GoogleMeetService googleMeetService;
 
+    @Autowired
+    private NotificacaoService notificacaoService;
+
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listar() {
         return consultaRepository.findAll().stream().map(ConsultaResponseDTO::new).toList();
@@ -51,10 +57,33 @@ public class ConsultaService {
         Paciente paciente = pacienteRepository.findById(usuarioId).orElse(null);
 
         if (medico == null && paciente == null) {
-            throw new ResourceNotFoundException("Usuario nao encontrado. Id: " + usuarioId);
+            throw new ResourceNotFoundException("Usuario não encontrado. Id: " + usuarioId);
         }
 
         return consultaRepository.findByMedicoOrPaciente(medico, paciente)
+                .stream()
+                .map(ConsultaResponseDTO::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ConsultaResponseDTO> listarAgendaDoDia(String medicoId) {
+        Medico medico = medicoRepository.findById(medicoId).orElse(null);
+
+        if (medico == null) {
+            throw new ResourceNotFoundException("Médico não encontrado. Id: " + medicoId);
+        }
+
+        LocalDate hoje = LocalDate.now();
+
+        LocalDateTime inicioDoDia = hoje.atStartOfDay();
+        LocalDateTime fimDoDia = hoje.atTime(LocalTime.MAX);
+
+        return consultaRepository
+                .findByMedicoAndDataHoraBetweenOrderByDataHoraAsc(
+                        medico,
+                        inicioDoDia,
+                        fimDoDia)
                 .stream()
                 .map(ConsultaResponseDTO::new)
                 .toList();
@@ -142,6 +171,19 @@ public class ConsultaService {
         } else {
             throw new BusinessException("O motivo do cancelamento não existe ou está nulo");
         }
+
+        // criar notificacoes
+        notificacaoService.criarNotificacao(
+                consulta.getPaciente(),
+                TipoNotificacao.cancelada,
+                "Consulta cancelada",
+                "Sua consulta com o Dr." + consulta.getMedico().getNome() + " foi cancelada.");
+
+        notificacaoService.criarNotificacao(
+                consulta.getMedico(),
+                TipoNotificacao.cancelada,
+                "Consulta cancelada",
+                "Sua consulta com o paciente." + consulta.getPaciente().getNome() + " foi cancelada.");
 
         return new ConsultaResponseDTO(consultaRepository.save(consulta));
     }

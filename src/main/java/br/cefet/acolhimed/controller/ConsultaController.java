@@ -43,6 +43,13 @@ public class ConsultaController {
         return ResponseEntity.ok(consultas);
     }
 
+    @GetMapping("/medico/{medicoId}/agenda")
+    @Operation(summary = "Listar Consultas do usuario")
+    public ResponseEntity<List<ConsultaResponseDTO>> listarAgendaDoDia(@PathVariable String medicoId) {
+        List<ConsultaResponseDTO> consultas = consultaService.listarAgendaDoDia(medicoId);
+        return ResponseEntity.ok(consultas);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Buscar consulta por ID")
     public ResponseEntity<ConsultaResponseDTO> buscarPorId(@PathVariable String id) {
