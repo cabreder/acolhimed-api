@@ -110,17 +110,14 @@ public class ConsultaService {
         consulta.setMotivoCancelamento("");
         consulta.setDataHora(dto.getDataHora());
 
-        /*
-         * String link;
-         * try {
-         * link = googleMeetService.criarReuniao();
-         * } catch (Exception e) {
-         * throw new
-         * RuntimeException("Não foi possível criar a reunião do Google Meet.", e);
-         * }
-         * consulta.setLinkConsulta(link);
-         * 
-         */
+        String link = null;
+
+        try {
+            link = googleMeetService.criarReuniao();
+        } catch (Exception e) {
+            System.out.println("Não foi possível criar o link do Google Meet.");
+        }
+        consulta.setLinkConsulta(link);
 
         consulta.setStatus(StatusConsulta.agendada);
 

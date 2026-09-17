@@ -37,8 +37,8 @@ public class ConsultaController {
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    @Operation(summary = "Listar Consultas do Usuario")
-    public ResponseEntity<List<ConsultaResponseDTO>> listarPorUsuario(@PathVariable String usuarioId) {
+    @Operation(summary = "Listar Consultas do usuario")
+    public ResponseEntity<List<ConsultaResponseDTO>> listarConsultasDoUsuario(@PathVariable String usuarioId) {
         List<ConsultaResponseDTO> consultas = consultaService.listarConsultasDoUsuario(usuarioId);
         return ResponseEntity.ok(consultas);
     }
