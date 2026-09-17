@@ -88,4 +88,13 @@ public class ConsultaController {
         ConsultaResponseDTO consultaResponseDTO = consultaService.cancelarConsulta(id, motivoCancelamento);
         return ResponseEntity.ok(consultaResponseDTO);
     }
+
+    @PatchMapping("/em_andamento/{id}")
+    @Operation(summary = "Definir consulta em andamento")
+    public ResponseEntity<ConsultaResponseDTO> definirConsultaEmAndamento(
+            @PathVariable String id,
+            @RequestBody String motivoCancelamento) {
+        ConsultaResponseDTO consultaResponseDTO = consultaService.definirConsultaEmAndamento(id);
+        return ResponseEntity.ok(consultaResponseDTO);
+    }
 }

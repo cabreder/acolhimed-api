@@ -189,6 +189,24 @@ public class ConsultaService {
     }
 
     @Transactional
+    public ConsultaResponseDTO definirConsultaEmAndamento(String id) {
+        Consulta consulta = buscarConsulta(id);
+
+        if (consulta.getStatus() == StatusConsulta.cancelada || consulta.getStatus() == StatusConsulta.finalizada) {
+            throw new BusinessException("Consulta cancelada ou finalizada não pode ser cancelada.");
+        }
+
+        if (!LocalDateTime.now().plusMinutes(15).isBefore(consulta.getDataHora())) {
+            throw new BusinessException(
+                    "A consulta so pode estar em andamento com mais de 15 minutos de antecedencia.");
+        }
+
+        consulta.setStatus(StatusConsulta.em_andamento);
+
+        return new ConsultaResponseDTO(consultaRepository.save(consulta));
+    }
+
+    @Transactional
     public ConsultaResponseDTO remarcarConsulta(String id, ConsultaRequestDTO dto) {
         Consulta consulta = buscarConsulta(id);
         LocalDateTime novaDataHora = validarNovaDataHora(dto);

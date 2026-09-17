@@ -10,7 +10,7 @@ INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e100000
 INSERT INTO tb_especialidades (id, nome, descricao, imagem_url) VALUES ('e1000000-0000-0000-0000-000000000010', 'Urologia', 'Especialidade que trata doenças do trato urinário e sistema reprodutor masculino.', 'https://feliciorocho.org.br/media/219/urologia.jpg');
 
 
-INSERT INTO tb_usuarios (id, nome, email, senha, tipo_usuario) VALUES ('4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21', 'Lionel Messi', 'c@1', '1234', 'paciente');
+INSERT INTO tb_usuarios (id, nome, email, foto, senha, tipo_usuario) VALUES ('4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21', 'Lionel Messi', 'c@1', 'https://res.cloudinary.com/mgw0uzkh/image/upload/v1789669849/fotos_minha_API/om07exhniubcmyx3e1rm.png', '1234', 'paciente');
 INSERT INTO tb_pacientes (usuario_id) VALUES ('4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21');
 
 INSERT INTO tb_usuarios (id, nome, email, senha, tipo_usuario) VALUES ('bdfc1043-b7bc-413b-8a11-80348a9936a4', 'Marcelo Balbino', 'm@g', '1234', 'medico');
