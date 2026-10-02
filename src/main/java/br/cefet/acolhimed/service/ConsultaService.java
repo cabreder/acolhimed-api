@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.cefet.acolhimed.dto.ConsultaRequestDTO;
 import br.cefet.acolhimed.dto.ConsultaResponseDTO;
-
+import br.cefet.acolhimed.dto.MedicoResponseDTO;
 import br.cefet.acolhimed.entity.Consulta;
 import br.cefet.acolhimed.entity.Especialidade;
 import br.cefet.acolhimed.entity.Medico;
@@ -46,9 +46,17 @@ public class ConsultaService {
     @Autowired
     private NotificacaoService notificacaoService;
 
+    @Autowired
+    private MedicoService medicoService;
+
+    private ConsultaResponseDTO montarDTO(Consulta consulta) {
+    MedicoResponseDTO medicoDTO = medicoService.montarDTO(consulta.getMedico());
+    return new ConsultaResponseDTO(consulta, medicoDTO);
+}
+
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listar() {
-        return consultaRepository.findAll().stream().map(ConsultaResponseDTO::new).toList();
+        return consultaRepository.findAll().stream().map(this::montarDTO).toList();
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +70,7 @@ public class ConsultaService {
 
         return consultaRepository.findByMedicoOrPaciente(medico, paciente)
                 .stream()
-                .map(ConsultaResponseDTO::new)
+                .map(this::montarDTO)
                 .toList();
     }
 
@@ -85,7 +93,7 @@ public class ConsultaService {
                         inicioDoDia,
                         fimDoDia)
                 .stream()
-                .map(ConsultaResponseDTO::new)
+                .map(this::montarDTO)
                 .toList();
     }
 
@@ -94,7 +102,7 @@ public class ConsultaService {
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Consulta não encontrada. Id: " + id));
 
-        return new ConsultaResponseDTO(consulta);
+        return montarDTO(consulta);
     }
 
     @Transactional(readOnly = true)
@@ -112,7 +120,7 @@ public class ConsultaService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Nenhuma consulta nos próximos 15 minutos."));
 
-        return new ConsultaResponseDTO(consulta);
+        return montarDTO(consulta);
     }
 
     @Transactional
@@ -150,7 +158,14 @@ public class ConsultaService {
 
         consulta.setStatus(StatusConsulta.agendada);
 
-        return new ConsultaResponseDTO(consultaRepository.save(consulta));
+        notificacaoService.criarNotificacao(
+                consulta.getMedico(),
+                TipoNotificacao.lembrete,
+                "Consulta agendada",
+                "Uma consulta com o paciente." + consulta.getPaciente().getNome() + " foi agendada.");
+
+        Consulta consultaSalva = consultaRepository.save(consulta);
+        return montarDTO(consultaSalva);
     }
 
     @Transactional
@@ -185,7 +200,8 @@ public class ConsultaService {
                 "Consulta cancelada",
                 "Sua consulta com o paciente." + consulta.getPaciente().getNome() + " foi cancelada.");
 
-        return new ConsultaResponseDTO(consultaRepository.save(consulta));
+        Consulta consultaCancelada = consultaRepository.save(consulta);
+        return montarDTO(consultaCancelada);
     }
 
     @Transactional
@@ -203,45 +219,57 @@ public class ConsultaService {
 
         consulta.setStatus(StatusConsulta.em_andamento);
 
-        return new ConsultaResponseDTO(consultaRepository.save(consulta));
+        Consulta consultaEmAndamento = consultaRepository.save(consulta);
+        return montarDTO(consultaEmAndamento);
     }
 
-    @Transactional
-    public ConsultaResponseDTO remarcarConsulta(String id, ConsultaRequestDTO dto) {
-        Consulta consulta = buscarConsulta(id);
-        LocalDateTime novaDataHora = validarNovaDataHora(dto);
-
-        if (consulta.getStatus() == StatusConsulta.cancelada || consulta.getStatus() == StatusConsulta.finalizada) {
-            throw new BusinessException("Consulta cancelada ou finalizada não pode ser remarcada.");
-        }
-
-        if (!LocalDateTime.now().plusDays(2).isBefore(consulta.getDataHora())) {
-            throw new BusinessException("A consulta so pode ser remarcada com mais de 2 dias de antecedencia.");
-        }
-
-        if (novaDataHora.isBefore(LocalDateTime.now())) {
-            throw new BusinessException("Não e permitido remarcar consulta para um horario que ja passou.");
-        }
-
-        validarHorarioDisponivelParaRemarcacao(consulta, novaDataHora);
-
-        consulta.setDataHora(novaDataHora);
-
-        return new ConsultaResponseDTO(consultaRepository.save(consulta));
-    }
+    /*
+     * @Transactional
+     * public ConsultaResponseDTO remarcarConsulta(String id, ConsultaRequestDTO
+     * dto) {
+     * Consulta consulta = buscarConsulta(id);
+     * LocalDateTime novaDataHora = validarNovaDataHora(dto);
+     * 
+     * if (consulta.getStatus() == StatusConsulta.cancelada || consulta.getStatus()
+     * == StatusConsulta.finalizada) {
+     * throw new
+     * BusinessException("Consulta cancelada ou finalizada não pode ser remarcada."
+     * );
+     * }
+     * 
+     * if (!LocalDateTime.now().plusDays(2).isBefore(consulta.getDataHora())) {
+     * throw new
+     * BusinessException("A consulta so pode ser remarcada com mais de 2 dias de antecedencia."
+     * );
+     * }
+     * 
+     * if (novaDataHora.isBefore(LocalDateTime.now())) {
+     * throw new
+     * BusinessException("Não e permitido remarcar consulta para um horario que ja passou."
+     * );
+     * }
+     * 
+     * validarHorarioDisponivelParaRemarcacao(consulta, novaDataHora);
+     * 
+     * consulta.setDataHora(novaDataHora);
+     * 
+     * return new ConsultaResponseDTO(consultaRepository.save(consulta));
+     * }
+     */
 
     private Consulta buscarConsulta(String id) {
         return consultaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Consulta nao encontrada. Id: " + id));
     }
 
-    private LocalDateTime validarNovaDataHora(ConsultaRequestDTO dto) {
-        if (dto == null || dto.getDataHora() == null) {
-            throw new BusinessException("O campo dataHora é obrigatorio para remarcar a consulta.");
-        }
+    // private LocalDateTime validarNovaDataHora(ConsultaRequestDTO dto) {
+    // if (dto == null || dto.getDataHora() == null) {
+    // throw new BusinessException("O campo dataHora é obrigatorio para remarcar a
+    // consulta.");
+    // }
 
-        return dto.getDataHora();
-    }
+    // return dto.getDataHora();
+    // }
 
     private void validarHorarioDisponivel(Medico medico, LocalDateTime dataHora) {
         if (consultaRepository.existsByMedicoAndDataHoraAndStatusNot(medico, dataHora, StatusConsulta.cancelada)) {
@@ -249,14 +277,16 @@ public class ConsultaService {
         }
     }
 
-    private void validarHorarioDisponivelParaRemarcacao(Consulta consulta, LocalDateTime novaDataHora) {
-        if (consultaRepository.existsByMedicoAndDataHoraAndStatusNotAndIdNot(
-                consulta.getMedico(),
-                novaDataHora,
-                StatusConsulta.cancelada,
-                consulta.getId())) {
-            throw new BusinessException("Ja existe uma consulta para este medico neste horario.");
-        }
-    }
+    // private void validarHorarioDisponivelParaRemarcacao(Consulta consulta,
+    // LocalDateTime novaDataHora) {
+    // if (consultaRepository.existsByMedicoAndDataHoraAndStatusNotAndIdNot(
+    // consulta.getMedico(),
+    // novaDataHora,
+    // StatusConsulta.cancelada,
+    // consulta.getId())) {
+    // throw new BusinessException("Ja existe uma consulta para este medico neste
+    // horario.");
+    // }
+    // }
 
 }

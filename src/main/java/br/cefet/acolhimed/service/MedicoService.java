@@ -27,13 +27,18 @@ public class MedicoService {
     @Autowired
     private UsuarioRepository UsuarioRepository;
 
-    @Autowired 
+    @Autowired
     private AvaliacaoRepository avaliacaoRepository;
 
-    @Transactional(readOnly = true)
+    public MedicoResponseDTO montarDTO(Medico medico) {
+        Double media = avaliacaoRepository.calcularMediaAvaliacao(medico.getId());
+        return new MedicoResponseDTO(medico, media);
+    }
+
     public List<MedicoResponseDTO> listar() {
-        List<Medico> Medicos = MedicoRepository.findAll();
-        return Medicos.stream().map(MedicoResponseDTO::new).toList();
+        return MedicoRepository.findAll().stream()
+                .map(this::montarDTO)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -76,7 +81,7 @@ public class MedicoService {
         medico.setUfEmissao(dto.getUfEmissao());
         medico.setCrm(dto.getCrm());
 
-        return new MedicoResponseDTO(MedicoRepository.save(medico));
+        return montarDTO(MedicoRepository.save(medico));
     }
 
     @Transactional
@@ -108,6 +113,6 @@ public class MedicoService {
         medico.setSobreMim(dto.getSobreMim());
         medico.setFormacaoAcademica(dto.getFormacaoAcademica());
 
-        return new MedicoResponseDTO(MedicoRepository.save(medico));
+        return montarDTO(MedicoRepository.save(medico));  
     }
 }
