@@ -35,6 +35,7 @@ import br.cefet.acolhimed.dto.PrescricaoResponseDTO;
 import br.cefet.acolhimed.entity.Consulta;
 import br.cefet.acolhimed.entity.ItemPrescricao;
 import br.cefet.acolhimed.entity.Prescricao;
+import br.cefet.acolhimed.enums.StatusConsulta;
 import br.cefet.acolhimed.exception.BusinessException;
 import br.cefet.acolhimed.exception.ResourceNotFoundException;
 import br.cefet.acolhimed.repository.ConsultaRepository;
@@ -77,6 +78,9 @@ public class PrescricaoService {
         prescricao.setTokenValidacao(gerarTokenValidacao(dto.getTokenValidacao()));
 
         dto.getItens().forEach(itemDTO -> prescricao.getItens().add(montarItem(itemDTO, prescricao)));
+
+        consulta.setStatus(StatusConsulta.finalizada);
+        consultaRepository.save(consulta);
 
         return new PrescricaoResponseDTO(prescricaoRepository.save(prescricao));
     }

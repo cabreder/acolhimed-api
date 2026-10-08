@@ -58,11 +58,11 @@ public class ConsultaService {
     private PrescricaoRepository prescricaoRepository;
 
     private ConsultaResponseDTO montarDTO(Consulta consulta) {
-    MedicoResponseDTO medicoDTO = medicoService.montarDTO(consulta.getMedico());
-    Boolean possuiAvaliacao = avaliacaoRepository.existsByConsultaId(consulta.getId());
-    Boolean possuiPrescricao = prescricaoRepository.existsByConsultaId(consulta.getId());
-    return new ConsultaResponseDTO(consulta, medicoDTO, possuiAvaliacao, possuiPrescricao);
-}
+        MedicoResponseDTO medicoDTO = medicoService.montarDTO(consulta.getMedico());
+        Boolean possuiAvaliacao = avaliacaoRepository.existsByConsultaId(consulta.getId());
+        Boolean possuiPrescricao = prescricaoRepository.existsByConsultaId(consulta.getId());
+        return new ConsultaResponseDTO(consulta, medicoDTO, possuiAvaliacao, possuiPrescricao);
+    }
 
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listar() {
@@ -119,16 +119,18 @@ public class ConsultaService {
     public ConsultaResponseDTO buscarConsultaEmAndamento(String usuarioId) {
 
         LocalDateTime agora = LocalDateTime.now();
-        LocalDateTime limite = agora.plusMinutes(15);
+
+        LocalDateTime inicio = agora.minusMinutes(30);
+        LocalDateTime fim = agora.plusMinutes(15);
 
         Consulta consulta = consultaRepository
                 .findFirstByPacienteIdAndDataHoraBetweenAndStatus(
                         usuarioId,
-                        agora,
-                        limite,
+                        inicio,
+                        fim,
                         StatusConsulta.agendada)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Nenhuma consulta nos próximos 15 minutos."));
+                        "Nenhuma consulta em andamento."));
 
         return montarDTO(consulta);
     }
@@ -172,7 +174,7 @@ public class ConsultaService {
                 consulta.getMedico(),
                 TipoNotificacao.lembrete,
                 "Consulta agendada",
-                "Uma consulta com o paciente." + consulta.getPaciente().getNome() + " foi agendada.");
+                "Uma consulta com o paciente " + consulta.getPaciente().getNome() + " foi agendada.");
 
         Consulta consultaSalva = consultaRepository.save(consulta);
         return montarDTO(consultaSalva);
@@ -222,9 +224,13 @@ public class ConsultaService {
             throw new BusinessException("Consulta cancelada ou finalizada não pode ser cancelada.");
         }
 
-        if (!LocalDateTime.now().plusMinutes(15).isBefore(consulta.getDataHora())) {
+        LocalDateTime agora = LocalDateTime.now();
+        LocalDateTime inicio = consulta.getDataHora().minusMinutes(15);
+        LocalDateTime fim = consulta.getDataHora().plusMinutes(30);
+
+        if (agora.isBefore(inicio) || agora.isAfter(fim)) {
             throw new BusinessException(
-                    "A consulta so pode estar em andamento com mais de 15 minutos de antecedencia.");
+                    "A consulta só pode ser colocada em andamento entre 15 minutos antes e 30 minutos após o horário agendado.");
         }
 
         consulta.setStatus(StatusConsulta.em_andamento);
