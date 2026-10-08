@@ -22,6 +22,8 @@ import br.cefet.acolhimed.repository.ConsultaRepository;
 import br.cefet.acolhimed.repository.EspecialidadeRepository;
 import br.cefet.acolhimed.repository.MedicoRepository;
 import br.cefet.acolhimed.repository.PacienteRepository;
+import br.cefet.acolhimed.repository.AvaliacaoRepository;
+import br.cefet.acolhimed.repository.PrescricaoRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -49,9 +51,17 @@ public class ConsultaService {
     @Autowired
     private MedicoService medicoService;
 
+    @Autowired
+    private AvaliacaoRepository avaliacaoRepository;
+
+    @Autowired
+    private PrescricaoRepository prescricaoRepository;
+
     private ConsultaResponseDTO montarDTO(Consulta consulta) {
     MedicoResponseDTO medicoDTO = medicoService.montarDTO(consulta.getMedico());
-    return new ConsultaResponseDTO(consulta, medicoDTO);
+    Boolean possuiAvaliacao = avaliacaoRepository.existsByConsultaId(consulta.getId());
+    Boolean possuiPrescricao = prescricaoRepository.existsByConsultaId(consulta.getId());
+    return new ConsultaResponseDTO(consulta, medicoDTO, possuiAvaliacao, possuiPrescricao);
 }
 
     @Transactional(readOnly = true)
@@ -192,13 +202,13 @@ public class ConsultaService {
                 consulta.getPaciente(),
                 TipoNotificacao.cancelada,
                 "Consulta cancelada",
-                "Sua consulta com o Dr." + consulta.getMedico().getNome() + " foi cancelada.");
+                "Sua consulta com o Dr. " + consulta.getMedico().getNome() + " foi cancelada.");
 
         notificacaoService.criarNotificacao(
                 consulta.getMedico(),
                 TipoNotificacao.cancelada,
                 "Consulta cancelada",
-                "Sua consulta com o paciente." + consulta.getPaciente().getNome() + " foi cancelada.");
+                "Sua consulta com o paciente " + consulta.getPaciente().getNome() + " foi cancelada.");
 
         Consulta consultaCancelada = consultaRepository.save(consulta);
         return montarDTO(consultaCancelada);

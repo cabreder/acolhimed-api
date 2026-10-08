@@ -12,6 +12,8 @@ import br.cefet.acolhimed.entity.Medico;
 public interface AvaliacaoRepository extends JpaRepository<Avaliacao, String>{
     List<Avaliacao> findByConsultaMedico(Medico medico);
 
+    boolean existsByConsultaId(String consultaId);
+
     @Query("""
         SELECT AVG(a.nota)
         FROM Avaliacao a
