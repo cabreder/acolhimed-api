@@ -27,6 +27,7 @@ import br.cefet.acolhimed.repository.PrescricaoRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class ConsultaService {
@@ -87,13 +88,15 @@ public class ConsultaService {
 
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listarAgendaDoDia(String medicoId) {
+
         Medico medico = medicoRepository.findById(medicoId).orElse(null);
 
         if (medico == null) {
-            throw new ResourceNotFoundException("Médico não encontrado. Id: " + medicoId);
+            throw new ResourceNotFoundException(
+                    "Médico não encontrado. Id: " + medicoId);
         }
 
-        LocalDate hoje = LocalDate.now();
+        LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
 
         LocalDateTime inicioDoDia = hoje.atStartOfDay();
         LocalDateTime fimDoDia = hoje.atTime(LocalTime.MAX);
@@ -119,7 +122,8 @@ public class ConsultaService {
     @Transactional(readOnly = true)
     public ConsultaResponseDTO buscarConsultaEmAndamento(String usuarioId) {
 
-        LocalDateTime agora = LocalDateTime.now();
+        LocalDateTime agora = LocalDateTime.now(
+                ZoneId.of("America/Sao_Paulo"));
 
         LocalDateTime inicio = agora.minusMinutes(30);
         LocalDateTime fim = agora.plusMinutes(15);
@@ -171,20 +175,18 @@ public class ConsultaService {
 
         consulta.setStatus(StatusConsulta.agendada);
 
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
+
+        String dataFormatada = consulta.getDataHora().format(formato);
+
         notificacaoService.criarNotificacao(
                 consulta.getMedico(),
                 TipoNotificacao.lembrete,
                 "Consulta agendada",
                 "Uma consulta com o paciente " + consulta.getPaciente().getNome() + " foi agendada para "
-                        + consulta.getDataHora());
+                        + dataFormatada);
 
         Consulta consultaSalva = consultaRepository.save(consulta);
-
-        System.out.println("DATA RECEBIDA: " + dto.getDataHora());
-        System.out.println("DATA DA CONSULTA: " + consulta.getDataHora());
-        System.out.println("HORA LOCAL: " +
-                LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
-        System.out.println("HORA DO SERVIDOR: " + LocalDateTime.now());
         return montarDTO(consultaSalva);
     }
 

@@ -43,7 +43,7 @@ import br.cefet.acolhimed.repository.UsuarioRepository;
 
 @Service
 public class PrescricaoService {
-    private static final String URL_VALIDACAO = "https://acolhimed.com/validar-prescricao/";
+    private static final String URL_VALIDACAO = "localhost:8100/validar-prescricao/";
     private static final Color AZUL_ESCURO = new Color(15, 36, 64);
     private static final Color AZUL = new Color(41, 171, 226);
     private static final Color CINZA_CLARO = new Color(244, 248, 252);
@@ -84,11 +84,11 @@ public class PrescricaoService {
         consulta.setStatus(StatusConsulta.finalizada);
         consultaRepository.save(consulta);
 
-         notificacaoService.criarNotificacao(
-                consulta.getMedico(),
+        notificacaoService.criarNotificacao(
+                consulta.getPaciente(),
                 TipoNotificacao.receita,
                 "Receita disponível",
-                "O médico " + consulta.getMedico().getNome() + " adicionou sua prescrição.");
+                "O Dr. " + consulta.getMedico().getNome() + " adicionou sua prescrição.");
 
         return new PrescricaoResponseDTO(prescricaoRepository.save(prescricao));
     }
