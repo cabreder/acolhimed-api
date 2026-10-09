@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
 import com.lowagie.text.Element;
 import com.lowagie.text.Font;
@@ -24,7 +23,6 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
@@ -36,6 +34,7 @@ import br.cefet.acolhimed.entity.Consulta;
 import br.cefet.acolhimed.entity.ItemPrescricao;
 import br.cefet.acolhimed.entity.Prescricao;
 import br.cefet.acolhimed.enums.StatusConsulta;
+import br.cefet.acolhimed.enums.TipoNotificacao;
 import br.cefet.acolhimed.exception.BusinessException;
 import br.cefet.acolhimed.exception.ResourceNotFoundException;
 import br.cefet.acolhimed.repository.ConsultaRepository;
@@ -61,6 +60,9 @@ public class PrescricaoService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired 
+    private NotificacaoService notificacaoService;
+
     @Transactional
     public PrescricaoResponseDTO inserir(PrescricaoRequestDTO dto) {
         String consultaId = buscarConsultaId(dto);
@@ -81,6 +83,12 @@ public class PrescricaoService {
 
         consulta.setStatus(StatusConsulta.finalizada);
         consultaRepository.save(consulta);
+
+         notificacaoService.criarNotificacao(
+                consulta.getMedico(),
+                TipoNotificacao.receita,
+                "Receita disponível",
+                "O médico " + consulta.getMedico().getNome() + " adicionou sua prescrição.");
 
         return new PrescricaoResponseDTO(prescricaoRepository.save(prescricao));
     }

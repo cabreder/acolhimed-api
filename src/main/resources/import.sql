@@ -19,3 +19,9 @@ INSERT INTO tb_medicos (usuario_id, crm, uf_emissao, sobre_mim, formacao_academi
 INSERT INTO tb_medicos_especialidades (id, medico_id, especialidade_id) VALUES ('a7b3c2e1-8f49-410a-bd62-59c8d17a3f5b', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', 'e1000000-0000-0000-0000-000000000007');
 
 INSERT INTO tb_horarios(id, medico_id, dia, manha, tarde, noite) VALUES ('11111111-1111-1111-1111-111111111111', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', 'segunda', true, false, true);
+
+INSERT INTO tb_consultas(id, medico_id, paciente_id, dataHora) VALUES ('awdahdawdhawdlwd', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', '4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21', '2026-10-08T22:00:00');
+INSERT INTO tb_consultas(id, medico_id, paciente_id, dataHora) VALUES ('awdahdawdhtjtyssawdlwd', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', '4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21', '2026-10-08T22:30:00');
+INSERT INTO tb_consultas(id, medico_id, paciente_id, dataHora) VALUES ('awdahdawdhawawdadlwd', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', '4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21', '2026-10-08T23:00:00');
+INSERT INTO tb_consultas(id, medico_id, paciente_id, dataHora) VALUES ('awdahdawdhttddghawdlwd', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', '4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21', '2026-10-08T23:30:00');
+INSERT INTO tb_consultas(id, medico_id, paciente_id, dataHora) VALUES ('awdahdawdhafsewdlwd', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', '4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21', '2026-10-09T00:00:00');

@@ -48,12 +48,17 @@ public class MedicoService {
 
         return medicos.stream()
                 .map(medico -> {
-                    Double media = avaliacaoRepository.calcularMediaAvaliacao(medico.getId());
+                    Double media = avaliacaoRepository
+                            .calcularMediaAvaliacao(medico.getId());
+
                     return new MedicoResponseDTO(medico, media);
                 })
-                .sorted(Comparator.comparing(
-                        MedicoResponseDTO::getMediaAvaliacao,
-                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .filter(medico -> medico.getMediaAvaliacao() != null
+                        && medico.getMediaAvaliacao() >= 4.0)
+                .sorted(
+                        Comparator.comparing(
+                                MedicoResponseDTO::getMediaAvaliacao,
+                                Comparator.reverseOrder()))
                 .limit(20)
                 .toList();
     }
@@ -113,6 +118,6 @@ public class MedicoService {
         medico.setSobreMim(dto.getSobreMim());
         medico.setFormacaoAcademica(dto.getFormacaoAcademica());
 
-        return montarDTO(MedicoRepository.save(medico));  
+        return montarDTO(MedicoRepository.save(medico));
     }
 }

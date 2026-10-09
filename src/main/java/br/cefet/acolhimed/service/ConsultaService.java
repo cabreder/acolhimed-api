@@ -26,6 +26,7 @@ import br.cefet.acolhimed.repository.AvaliacaoRepository;
 import br.cefet.acolhimed.repository.PrescricaoRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 
 @Service
 public class ConsultaService {
@@ -174,9 +175,16 @@ public class ConsultaService {
                 consulta.getMedico(),
                 TipoNotificacao.lembrete,
                 "Consulta agendada",
-                "Uma consulta com o paciente " + consulta.getPaciente().getNome() + " foi agendada.");
+                "Uma consulta com o paciente " + consulta.getPaciente().getNome() + " foi agendada para "
+                        + consulta.getDataHora());
 
         Consulta consultaSalva = consultaRepository.save(consulta);
+
+        System.out.println("DATA RECEBIDA: " + dto.getDataHora());
+        System.out.println("DATA DA CONSULTA: " + consulta.getDataHora());
+        System.out.println("HORA LOCAL: " +
+                LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
+        System.out.println("HORA DO SERVIDOR: " + LocalDateTime.now());
         return montarDTO(consultaSalva);
     }
 
@@ -224,7 +232,7 @@ public class ConsultaService {
             throw new BusinessException("Consulta cancelada ou finalizada não pode ser cancelada.");
         }
 
-        LocalDateTime agora = LocalDateTime.now();
+        LocalDateTime agora = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         LocalDateTime inicio = consulta.getDataHora().minusMinutes(15);
         LocalDateTime fim = consulta.getDataHora().plusMinutes(30);
 
