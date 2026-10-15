@@ -1,5 +1,8 @@
 package br.cefet.acolhimed.dto;
 
+import lombok.Getter;
+
+@Getter
 public class AutenticacaoResponseDTO {
     private String token;
 
