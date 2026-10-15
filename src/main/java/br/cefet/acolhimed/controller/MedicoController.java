@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,13 +28,6 @@ public class MedicoController {
     @Autowired
     private MedicoService MedicoService;
 
-    @GetMapping
-    @Operation(summary = "Listar Medicos")
-    public ResponseEntity<List<MedicoResponseDTO>> listar() {
-        List<MedicoResponseDTO> Medicos = MedicoService.listar();
-        return ResponseEntity.ok(Medicos);
-    }
-
     @GetMapping("/destaques")
     @Operation(summary = "Listar Medicos Mais Bem Avaliados")
     public ResponseEntity<List<MedicoResponseDTO>> listarMedicosBemAvaliados() {
@@ -50,12 +42,11 @@ public class MedicoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(medicoResponseDTO);
     }
     
-    @PutMapping("/{id}")
+    @PutMapping
     @Operation(summary = "Atualizar Medico")
-    public ResponseEntity<MedicoResponseDTO> atualizar(@PathVariable String id, @Valid @RequestBody MedicoRequestDTO MedicoRequestDTO) {
+    public ResponseEntity<MedicoResponseDTO> atualizar(@Valid @RequestBody MedicoRequestDTO MedicoRequestDTO) {
 
-    	MedicoResponseDTO medicoResponseDTO = MedicoService.atualizar(id, MedicoRequestDTO);
-
+    	MedicoResponseDTO medicoResponseDTO = MedicoService.atualizar(MedicoRequestDTO);
         return ResponseEntity.ok(medicoResponseDTO);
     }    
 

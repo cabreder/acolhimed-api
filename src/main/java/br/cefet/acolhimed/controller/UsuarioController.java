@@ -28,25 +28,12 @@ public class UsuarioController {
     @Autowired
     private UsuarioService UsuarioService;
 
-    @GetMapping
-    @Operation(summary = "Listar Usuarios")
-    public ResponseEntity<List<UsuarioResponseDTO>> listar() {
-        List<UsuarioResponseDTO> usuarios = UsuarioService.listar();
-        return ResponseEntity.ok(usuarios);
-    }
-
     @GetMapping("/{id}")
     @Operation(summary = "Buscar Usuario por ID")
     public ResponseEntity<UsuarioResponseDTO> buscarPorId(@PathVariable String id) {
+
         UsuarioResponseDTO usuarioResponseDTO = UsuarioService.buscarPorId(id);
         return ResponseEntity.ok(usuarioResponseDTO);
-    }
-
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir Usuario")
-    public ResponseEntity<Void> excluir(@PathVariable String id) {
-        UsuarioService.excluir(id);
-        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/login")

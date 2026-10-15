@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,8 +52,14 @@ public class AvaliacaoService {
             throw new BusinessException("Médico não encontrado. Id: " + consulta.getMedico().getId());
         }
 
-        if (!pacienteRepository.existsById(consulta.getPaciente().getId())) {
-            throw new BusinessException("Paciente não encontrado. Id: " + consulta.getPaciente().getId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        UserDetails usuario = (UserDetails) authentication.getPrincipal();
+
+        String usuarioId = usuario.getUsername();
+
+        if(!usuarioId.equals(consulta.getPaciente().getId())){
+            throw new BusinessException("Apenas o paciente atrelado a esta consulta pode avalia-la.");
         }
 
         Avaliacao avaliacao = new Avaliacao();

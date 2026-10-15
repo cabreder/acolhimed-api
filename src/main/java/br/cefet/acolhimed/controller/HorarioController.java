@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,11 +24,10 @@ public class HorarioController {
     @Autowired
     private HorarioService horarioService;
 
-    @GetMapping("/{medicoId}")
-    public ResponseEntity<List<HorarioResponseDTO>> getEspecialidadesDoMedico(
-            @PathVariable String medicoId) {
+    @GetMapping
+    public ResponseEntity<List<HorarioResponseDTO>> getHorariosDoMedico(@PathVariable String id) {
 
-        return ResponseEntity.ok(horarioService.buscarPorMedico(medicoId));
+        return ResponseEntity.ok(horarioService.buscarPorMedico(id));
     }
 
     @PutMapping

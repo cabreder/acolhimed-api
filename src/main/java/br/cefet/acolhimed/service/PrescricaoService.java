@@ -6,6 +6,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,15 +63,25 @@ public class PrescricaoService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    @Autowired 
+    @Autowired
     private NotificacaoService notificacaoService;
 
     @Transactional
     public PrescricaoResponseDTO inserir(PrescricaoRequestDTO dto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        UserDetails usuario = (UserDetails) authentication.getPrincipal();
+
+        String medicoId = usuario.getUsername();
+
+        if (!medicoId.equals(dto.getConsulta().getMedico().getId())) {
+            throw new BusinessException("Apenas o médico vinculado a esta consulta pode prescrever.");
+        }
+
         String consultaId = buscarConsultaId(dto);
 
         Consulta consulta = consultaRepository.findById(consultaId)
-                .orElseThrow(() -> new ResourceNotFoundException("Consulta nao encontrada. Id: " + consultaId));
+                .orElseThrow(() -> new ResourceNotFoundException("Consulta não encontrada. Id: " + consultaId));
 
         if (prescricaoRepository.existsByConsultaId(consultaId)) {
             throw new BusinessException("Ja existe uma prescricao cadastrada para esta consulta.");
@@ -97,21 +110,42 @@ public class PrescricaoService {
     public PrescricaoResponseDTO buscarPorConsulta(String consultaId) {
         Prescricao prescricao = prescricaoRepository.findByConsultaId(consultaId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Prescricao nao encontrada para a consulta. Id: " + consultaId));
+                        "Prescrição não encontrada para a consulta. Id: " + consultaId));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        UserDetails usuario = (UserDetails) authentication.getPrincipal();
+
+        String usuarioId = usuario.getUsername();
+
+        Consulta consulta = prescricao.getConsulta();
+
+        String medicoId = consulta.getMedico().getId();
+        String pacienteId = consulta.getPaciente().getId();
+
+        if (!usuarioId.equals(medicoId) && !usuarioId.equals(pacienteId)) {
+            throw new BusinessException("Você não tem permissão para visualizar esta prescrição.");
+        }
 
         return new PrescricaoResponseDTO(prescricao);
     }
 
     @Transactional(readOnly = true)
-    public PrescricaoResponseDTO buscarPorUsuario(String usuarioId) {
+    public PrescricaoResponseDTO buscarPorUsuario() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        UserDetails usuario = (UserDetails) authentication.getPrincipal();
+
+        String usuarioId = usuario.getUsername();
+
         if (!usuarioRepository.existsById(usuarioId)) {
-            throw new ResourceNotFoundException("Usuario nao encontrado. Id: " + usuarioId);
+            throw new ResourceNotFoundException("Usuário não encontrado. Id: " + usuarioId);
         }
 
         Prescricao prescricao = prescricaoRepository
                 .findFirstByConsultaPacienteIdOrConsultaMedicoIdOrderByDataDesc(usuarioId, usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Prescricao nao encontrada para o usuario. Id: " + usuarioId));
+                        "Prescricão não encontrada para o usuario. Id: " + usuarioId));
 
         return new PrescricaoResponseDTO(prescricao);
     }
@@ -120,7 +154,7 @@ public class PrescricaoService {
     public PrescricaoResponseDTO validar(String tokenValidacao) {
         Prescricao prescricao = prescricaoRepository.findByTokenValidacao(tokenValidacao)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Prescricao nao encontrada ou nao emitida pelo AcolhiMed."));
+                        "Prescricao não encontrada ou não emitida pelo AcolhiMed."));
 
         return new PrescricaoResponseDTO(prescricao);
     }
