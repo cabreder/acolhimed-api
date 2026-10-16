@@ -24,9 +24,8 @@ public class HorarioController {
     @Autowired
     private HorarioService horarioService;
 
-    @GetMapping
+    @GetMapping("/{id}")
     public ResponseEntity<List<HorarioResponseDTO>> getHorariosDoMedico(@PathVariable String id) {
-
         return ResponseEntity.ok(horarioService.buscarPorMedico(id));
     }
 

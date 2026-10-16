@@ -30,8 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = recuperarToken(request);
 
-        System.out.println("Token recebido: " + (token != null));
-
         if (token != null) {
             System.out.println("Token válido: " + jwtService.validarToken(token));
         }
