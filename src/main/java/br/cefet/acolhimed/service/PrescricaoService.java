@@ -145,7 +145,7 @@ public class PrescricaoService {
         Prescricao prescricao = prescricaoRepository
                 .findFirstByConsultaPacienteIdOrConsultaMedicoIdOrderByDataDesc(usuarioId, usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Prescricão não encontrada para o usuario. Id: " + usuarioId));
+                        "Prescrição não encontrada para o usuário. Id: " + usuarioId));
 
         return new PrescricaoResponseDTO(prescricao);
     }
@@ -162,7 +162,22 @@ public class PrescricaoService {
     @Transactional(readOnly = true)
     public byte[] gerarPdf(String id) {
         Prescricao prescricao = prescricaoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Prescricao nao encontrada. Id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Prescrição não encontrada. Id: " + id));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        UserDetails usuario = (UserDetails) authentication.getPrincipal();
+        String usuarioId = usuario.getUsername();
+
+        Consulta consulta = prescricao.getConsulta();
+
+        boolean ehPaciente = usuarioId.equals(consulta.getPaciente().getId());
+        boolean ehMedico = usuarioId.equals(consulta.getMedico().getId());
+
+        if (!ehPaciente && !ehMedico) {
+            throw new BusinessException(
+                    "Você não tem permissão para acessar esta prescrição.");
+        }
 
         return montarPdf(prescricao);
     }
@@ -176,7 +191,7 @@ public class PrescricaoService {
             return dto.getConsulta().getId();
         }
 
-        throw new BusinessException("O campo consultaId e obrigatorio.");
+        throw new BusinessException("O campo consultaId e obrigatório.");
     }
 
     private String gerarTokenValidacao(String tokenInformado) {

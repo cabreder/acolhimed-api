@@ -314,13 +314,13 @@ public class ConsultaService {
 
     private Consulta buscarConsulta(String id) {
         return consultaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Consulta nao encontrada. Id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Consulta não encontrada. Id: " + id));
 
     }
 
     private void validarHorarioDisponivel(Medico medico, LocalDateTime dataHora) {
         if (consultaRepository.existsByMedicoAndDataHoraAndStatusNot(medico, dataHora, StatusConsulta.cancelada)) {
-            throw new BusinessException("Ja existe uma consulta para este medico neste horario.");
+            throw new BusinessException("Já existe uma consulta para este médico neste horário.");
         }
     }
 }

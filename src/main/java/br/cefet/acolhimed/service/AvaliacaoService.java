@@ -33,9 +33,6 @@ public class AvaliacaoService {
     private MedicoRepository medicoRepository;
 
     @Autowired
-    private PacienteRepository pacienteRepository;
-
-    @Autowired
     private ConsultaRepository consultaRepository;
 
     @Transactional
