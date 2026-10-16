@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.cefet.acolhimed.dto.EspecialidadeResponseDTO;
 import br.cefet.acolhimed.dto.MedicoRequestDTO;
 import br.cefet.acolhimed.dto.MedicoResponseDTO;
 import br.cefet.acolhimed.service.MedicoService;
@@ -27,6 +28,13 @@ public class MedicoController {
 
     @Autowired
     private MedicoService MedicoService;
+
+    @GetMapping
+    @Operation(summary = "Listar médicos")
+    public ResponseEntity<List<MedicoResponseDTO>> listar() {
+        List<MedicoResponseDTO> medicos = MedicoService.listar();
+        return ResponseEntity.ok(medicos);
+    }
 
     @GetMapping("/destaques")
     @Operation(summary = "Listar Medicos Mais Bem Avaliados")

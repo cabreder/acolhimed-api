@@ -23,7 +23,7 @@ import br.cefet.acolhimed.security.JwtService;
 @Service
 public class UsuarioService {
 
-    @Autowired
+    @Autowired  
     private UsuarioRepository usuarioRepository;
 
     @Autowired
@@ -35,6 +35,13 @@ public class UsuarioService {
     @Autowired
     private JwtService jwtService;
 
+    @Transactional(readOnly = true)
+    public List<UsuarioResponseDTO> listar() {
+        return usuarioRepository.findAll()
+                .stream()
+                .map(UsuarioResponseDTO::new)
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public UsuarioResponseDTO buscarPorId(String id) {

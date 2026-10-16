@@ -15,8 +15,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import br.cefet.acolhimed.service.MedicoService;
 import br.cefet.acolhimed.service.UsuarioService;
 import br.cefet.acolhimed.dto.LoginRequestDTO;
+import br.cefet.acolhimed.dto.MedicoResponseDTO;
 import br.cefet.acolhimed.dto.UsuarioResponseDTO;
 
 
@@ -27,6 +29,13 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService UsuarioService;
+
+    @GetMapping
+    @Operation(summary = "Listar usuários")
+    public ResponseEntity<List<UsuarioResponseDTO>> listar() {
+        List<UsuarioResponseDTO> usuarios = UsuarioService.listar();
+        return ResponseEntity.ok(usuarios);
+    }
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar Usuario por ID")

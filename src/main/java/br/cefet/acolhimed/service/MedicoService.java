@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.cefet.acolhimed.dto.EspecialidadeResponseDTO;
 import br.cefet.acolhimed.dto.MedicoRequestDTO;
 import br.cefet.acolhimed.dto.MedicoResponseDTO;
 import br.cefet.acolhimed.entity.Medico;
@@ -40,6 +41,14 @@ public class MedicoService {
     public MedicoResponseDTO montarDTO(Medico medico) {
         Double media = avaliacaoRepository.calcularMediaAvaliacao(medico.getId());
         return new MedicoResponseDTO(medico, media);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MedicoResponseDTO> listar() {
+        return MedicoRepository.findAll()
+                .stream()
+                .map(this::montarDTO)
+                .toList();
     }
 
     @Transactional(readOnly = true)
