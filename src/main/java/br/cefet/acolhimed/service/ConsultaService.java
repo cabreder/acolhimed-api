@@ -71,11 +71,8 @@ public class ConsultaService {
 
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listarConsultasDoUsuario() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String usuarioId = usuario.getUsername();
+        String usuarioId = obterIdUsuarioAutenticado();
 
         Medico medico = medicoRepository.findById(usuarioId).orElse(null);
         Paciente paciente = pacienteRepository.findById(usuarioId).orElse(null);
@@ -92,11 +89,8 @@ public class ConsultaService {
 
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listarAgendaDoDia() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String medicoId = usuario.getUsername();
+        String medicoId =  obterIdUsuarioAutenticado();
 
         Medico medico = medicoRepository.findById(medicoId).orElse(null);
 
@@ -125,11 +119,7 @@ public class ConsultaService {
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Consulta não encontrada. Id: " + id));
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String usuarioId = usuario.getUsername();
+        String usuarioId =  obterIdUsuarioAutenticado();
 
         if (!usuarioId.equals(consulta.getPaciente().getId()) && !usuarioId.equals(consulta.getMedico().getId())) {
             throw new BusinessException(
@@ -142,11 +132,7 @@ public class ConsultaService {
     @Transactional(readOnly = true)
     public ConsultaResponseDTO buscarConsultaEmAndamento() {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String usuarioId = usuario.getUsername();
+        String usuarioId =  obterIdUsuarioAutenticado();
 
         LocalDateTime agora = LocalDateTime.now(
                 ZoneId.of("America/Sao_Paulo"));
@@ -168,23 +154,19 @@ public class ConsultaService {
 
     @Transactional
     public ConsultaResponseDTO inserir(ConsultaRequestDTO dto) {
-        Medico medico = medicoRepository.findById(dto.getMedico().getId())
+        Medico medico = medicoRepository.findById(dto.getMedicoId())
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("Médico não encontrado. Id: " + dto.getMedico().getId()));
+                        () -> new ResourceNotFoundException("Médico não encontrado. Id: " + dto.getMedicoId()));
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String pacienteId = usuario.getUsername();
+        String pacienteId =  obterIdUsuarioAutenticado();
 
         Paciente paciente = pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Paciente não encontrado. Id: " + pacienteId));
 
-        Especialidade especialidade = especialidadeRepository.findById(dto.getEspecialidade().getId())
+        Especialidade especialidade = especialidadeRepository.findById(dto.getEspecialidadeId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Especialidade nao encontrada. Id: " + dto.getEspecialidade().getId()));
+                        "Especialidade nao encontrada. Id: " + dto.getEspecialidadeId()));
 
         validarHorarioDisponivel(medico, dto.getDataHora());
 
@@ -230,7 +212,7 @@ public class ConsultaService {
 
         UserDetails usuario = (UserDetails) authentication.getPrincipal();
 
-        String usuarioId = usuario.getUsername();
+        String usuarioId =  obterIdUsuarioAutenticado();
 
         String tipoUsuario = usuario.getAuthorities()
                 .iterator()
@@ -281,16 +263,14 @@ public class ConsultaService {
 
     @Transactional
     public ConsultaResponseDTO definirConsultaEmAndamento(String id) {
+
         Consulta consulta = buscarConsulta(id);
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String usuarioId =  obterIdUsuarioAutenticado();
 
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String usuarioId = usuario.getUsername();
-
-        if(!usuarioId.equals(consulta.getPaciente().getId()) && !usuarioId.equals(consulta.getMedico().getId()) ){
-            throw new BusinessException("Apenas o paciente ou o médico atrelado a esta consulta podem defini-la em andamento.");
+        if (!usuarioId.equals(consulta.getPaciente().getId()) && !usuarioId.equals(consulta.getMedico().getId())) {
+            throw new BusinessException(
+                    "Apenas o paciente ou o médico atrelado a esta consulta podem defini-la em andamento.");
         }
 
         if (consulta.getStatus() == StatusConsulta.cancelada || consulta.getStatus() == StatusConsulta.finalizada) {
@@ -322,5 +302,13 @@ public class ConsultaService {
         if (consultaRepository.existsByMedicoAndDataHoraAndStatusNot(medico, dataHora, StatusConsulta.cancelada)) {
             throw new BusinessException("Já existe uma consulta para este médico neste horário.");
         }
+    }
+
+    private String obterIdUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        UserDetails usuario = (UserDetails) authentication.getPrincipal();
+
+        return usuario.getUsername();
     }
 }

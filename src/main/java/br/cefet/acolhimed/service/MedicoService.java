@@ -1,5 +1,6 @@
 package br.cefet.acolhimed.service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
@@ -77,7 +78,7 @@ public class MedicoService {
     public MedicoResponseDTO inserir(MedicoRequestDTO dto) {
 
         if (MedicoRepository.existsByCrm(dto.getCrm())) {
-            throw new BusinessException("Ja existe uma Medico com esse CRM.");
+            throw new BusinessException("Ja existe uma médico com esse CRM.");
         }
 
         if (UsuarioRepository.existsByEmail(dto.getEmail())) {
@@ -108,7 +109,7 @@ public class MedicoService {
         String medicoId = usuario.getUsername();
 
         Medico medico = MedicoRepository.findById(medicoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Médico nao encontrado. Id: " + medicoId));
+                .orElseThrow(() -> new ResourceNotFoundException("Médico não encontrado. Id: " + medicoId));
 
         // Busca se ALGUÉM usa o novo e-mail
         Optional<Medico> usuarioComMesmoEmail = MedicoRepository.findByEmail(dto.getEmail());
@@ -117,6 +118,23 @@ public class MedicoService {
         // barra
         if (usuarioComMesmoEmail.isPresent() && !usuarioComMesmoEmail.get().getId().equals(medicoId)) {
             throw new BusinessException("Já existe um usuário com esse e-mail.");
+        }
+
+        // Busca se alguem usa o cpf
+        Optional<Medico> usuarioComMesmoCpf = MedicoRepository.findByCpf(dto.getCpf());
+
+        // Se o cpf já existe E não pertence ao próprio usuário que está logado, aí
+        // barra
+        if (usuarioComMesmoCpf.isPresent() && !usuarioComMesmoCpf.get().getId().equals(medicoId)) {
+            throw new BusinessException("Já existe um usuário com esse CPF.");
+        }
+
+        LocalDate nascimento = dto.getDataNascimento().toLocalDate();
+
+        if (dto.getDataNascimento() == null
+                || nascimento.isBefore(LocalDate.of(1900, 1, 1))
+                || nascimento.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Data de nascimento inválida.");
         }
 
         medico.setNome(dto.getNome());

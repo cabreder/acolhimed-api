@@ -55,22 +55,16 @@ public class NotificacaoService {
 
     @Transactional
     public void marcarTodasComoLidas() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String usuarioId = usuario.getUsername();
+        String usuarioId = obterIdUsuarioAutenticado();
 
         notificacaoRepository.marcarTodasComoLidas(usuarioId);
     }
 
     @Transactional(readOnly = true)
     public List<NotificacaoResponseDTO> listarPorUsuario() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String usuarioId = usuario.getUsername();
+        
+        String usuarioId = obterIdUsuarioAutenticado();
 
         Medico medico = medicoRepository.findById(usuarioId).orElse(null);
         Paciente paciente = pacienteRepository.findById(usuarioId).orElse(null);
@@ -83,5 +77,13 @@ public class NotificacaoService {
                 .stream()
                 .map(NotificacaoResponseDTO::new)
                 .toList();
+    }
+
+    private String obterIdUsuarioAutenticado(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        UserDetails usuario = (UserDetails) authentication.getPrincipal();
+
+        return usuario.getUsername();
     }
 }

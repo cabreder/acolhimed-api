@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class HorarioRequestDTO {
     
-    @NotEmpty
+    @NotEmpty(message = "O campo horarios é obrigatório")
     private List<HorarioResponseDTO> horarios;
 }

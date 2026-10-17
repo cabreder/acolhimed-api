@@ -2,6 +2,8 @@ package br.cefet.acolhimed.service;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -46,7 +48,7 @@ import br.cefet.acolhimed.repository.UsuarioRepository;
 
 @Service
 public class PrescricaoService {
-    private static final String URL_VALIDACAO = "localhost:8100/validar-prescricao/";
+    private static final String URL_VALIDACAO = "https://localhost:8100/validar-prescricao/";
     private static final Color AZUL_ESCURO = new Color(15, 36, 64);
     private static final Color AZUL = new Color(41, 171, 226);
     private static final Color CINZA_CLARO = new Color(244, 248, 252);
@@ -68,29 +70,31 @@ public class PrescricaoService {
 
     @Transactional
     public PrescricaoResponseDTO inserir(PrescricaoRequestDTO dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String medicoId = usuario.getUsername();
-
-        if (!medicoId.equals(dto.getConsulta().getMedico().getId())) {
-            throw new BusinessException("Apenas o médico vinculado a esta consulta pode prescrever.");
+        if (prescricaoRepository.existsByConsultaId(dto.getConsultaId())) {
+            throw new BusinessException("Já existe uma prescrição cadastrada para esta consulta.");
         }
 
-        String consultaId = buscarConsultaId(dto);
+        LocalDateTime hoje = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
 
-        Consulta consulta = consultaRepository.findById(consultaId)
-                .orElseThrow(() -> new ResourceNotFoundException("Consulta não encontrada. Id: " + consultaId));
+        String medicoId = obterIdUsuarioAutenticado();
 
-        if (prescricaoRepository.existsByConsultaId(consultaId)) {
-            throw new BusinessException("Ja existe uma prescricao cadastrada para esta consulta.");
+        Consulta consulta = consultaRepository.findById(dto.getConsultaId())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Consulta não encontrada. Id: " + dto.getConsultaId()));
+
+        if (!medicoId.equals(consulta.getMedico().getId())) {
+            throw new BusinessException("Apenas o médico atrelado a esta consulta pode adicionar um prescrição.");
+        }
+
+        if (consulta.getStatus() != StatusConsulta.em_andamento) {
+            throw new BusinessException("Apenas consultas em andamento podem receber uma prescrição.");
         }
 
         Prescricao prescricao = new Prescricao();
         prescricao.setConsulta(consulta);
-        prescricao.setData(dto.getData());
-        prescricao.setTokenValidacao(gerarTokenValidacao(dto.getTokenValidacao()));
+        prescricao.setData(hoje);
+        prescricao.setTokenValidacao(gerarTokenValidacao());
 
         dto.getItens().forEach(itemDTO -> prescricao.getItens().add(montarItem(itemDTO, prescricao)));
 
@@ -112,11 +116,7 @@ public class PrescricaoService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Prescrição não encontrada para a consulta. Id: " + consultaId));
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String usuarioId = usuario.getUsername();
+        String usuarioId = obterIdUsuarioAutenticado();
 
         Consulta consulta = prescricao.getConsulta();
 
@@ -132,11 +132,8 @@ public class PrescricaoService {
 
     @Transactional(readOnly = true)
     public PrescricaoResponseDTO buscarPorUsuario() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        UserDetails usuario = (UserDetails) authentication.getPrincipal();
-
-        String usuarioId = usuario.getUsername();
+        String usuarioId = obterIdUsuarioAutenticado();
 
         if (!usuarioRepository.existsById(usuarioId)) {
             throw new ResourceNotFoundException("Usuário não encontrado. Id: " + usuarioId);
@@ -182,22 +179,7 @@ public class PrescricaoService {
         return montarPdf(prescricao);
     }
 
-    private String buscarConsultaId(PrescricaoRequestDTO dto) {
-        if (dto.getConsultaId() != null && !dto.getConsultaId().isBlank()) {
-            return dto.getConsultaId();
-        }
-
-        if (dto.getConsulta() != null && dto.getConsulta().getId() != null && !dto.getConsulta().getId().isBlank()) {
-            return dto.getConsulta().getId();
-        }
-
-        throw new BusinessException("O campo consultaId e obrigatório.");
-    }
-
-    private String gerarTokenValidacao(String tokenInformado) {
-        if (tokenInformado != null && !tokenInformado.isBlank()) {
-            return tokenInformado;
-        }
+    private String gerarTokenValidacao() {
 
         String token = UUID.randomUUID().toString();
         while (prescricaoRepository.findByTokenValidacao(token).isPresent()) {
@@ -292,6 +274,14 @@ public class PrescricaoService {
         adicionarInfoCell(tabela, "CODIGO DA PRESCRICAO", prescricao.getId());
 
         document.add(tabela);
+    }
+
+    private String obterIdUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        UserDetails usuario = (UserDetails) authentication.getPrincipal();
+
+        return usuario.getUsername();
     }
 
     private void adicionarConsulta(Document document, Consulta consulta) throws Exception {

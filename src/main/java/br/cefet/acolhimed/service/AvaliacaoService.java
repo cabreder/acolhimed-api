@@ -21,7 +21,6 @@ import br.cefet.acolhimed.exception.ResourceNotFoundException;
 import br.cefet.acolhimed.repository.AvaliacaoRepository;
 import br.cefet.acolhimed.repository.ConsultaRepository;
 import br.cefet.acolhimed.repository.MedicoRepository;
-import br.cefet.acolhimed.repository.PacienteRepository;
 
 @Service
 public class AvaliacaoService {
