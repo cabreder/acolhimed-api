@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.cefet.acolhimed.dto.MedicoRequestDTO;
+import br.cefet.acolhimed.dto.PacienteRequestDTO;
 import br.cefet.acolhimed.dto.UsuarioRequestDTO;
 import br.cefet.acolhimed.dto.UsuarioResponseDTO;
 import br.cefet.acolhimed.entity.Paciente;
@@ -77,13 +79,7 @@ public class PacienteService {
             throw new BusinessException("Já existe um usuário com esse CPF.");
         }
 
-        LocalDate nascimento = dto.getDataNascimento().toLocalDate();
-
-        if (dto.getDataNascimento() == null
-                || nascimento.isBefore(LocalDate.of(1900, 1, 1))
-                || nascimento.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Data de nascimento inválida.");
-        }
+        validarDataNascimento(dto);
 
         paciente.setNome(dto.getNome());
         paciente.setEmail(dto.getEmail());
@@ -97,5 +93,30 @@ public class PacienteService {
         }
 
         return new UsuarioResponseDTO(pacienteRepository.save(paciente));
+    }
+
+    private boolean validarDataNascimento(UsuarioRequestDTO dto){
+         if (dto.getDataNascimento() == null) {
+            throw new BusinessException("A data de nascimento é obrigatória.");
+        }
+
+        LocalDate nascimento = dto.getDataNascimento().toLocalDate();
+
+        if (nascimento.isBefore(LocalDate.of(1900, 1, 1))) {
+            throw new BusinessException(
+                    "A data de nascimento não pode ser anterior a 01/01/1900.");
+        }
+
+        if (nascimento.isAfter(LocalDate.now())) {
+            throw new BusinessException(
+                    "A data de nascimento não pode ser futura.");
+        }
+
+        if (nascimento.plusYears(18).isAfter(LocalDate.now())) {
+            throw new BusinessException(
+                    "O paciente deve ter pelo menos 18 anos.");
+        }
+
+        return true;
     }
 }

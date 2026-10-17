@@ -129,13 +129,7 @@ public class MedicoService {
             throw new BusinessException("Já existe um usuário com esse CPF.");
         }
 
-        LocalDate nascimento = dto.getDataNascimento().toLocalDate();
-
-        if (dto.getDataNascimento() == null
-                || nascimento.isBefore(LocalDate.of(1900, 1, 1))
-                || nascimento.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Data de nascimento inválida.");
-        }
+        validarDataNascimento(dto);
 
         medico.setNome(dto.getNome());
         medico.setEmail(dto.getEmail());
@@ -152,5 +146,30 @@ public class MedicoService {
         medico.setFormacaoAcademica(dto.getFormacaoAcademica());
 
         return montarDTO(MedicoRepository.save(medico));
+    }
+
+    private boolean validarDataNascimento(MedicoRequestDTO dto){
+         if (dto.getDataNascimento() == null) {
+            throw new BusinessException("A data de nascimento é obrigatória.");
+        }
+
+        LocalDate nascimento = dto.getDataNascimento().toLocalDate();
+
+        if (nascimento.isBefore(LocalDate.of(1900, 1, 1))) {
+            throw new BusinessException(
+                    "A data de nascimento não pode ser anterior a 01/01/1900.");
+        }
+
+        if (nascimento.isAfter(LocalDate.now())) {
+            throw new BusinessException(
+                    "A data de nascimento não pode ser futura.");
+        }
+
+        if (nascimento.plusYears(18).isAfter(LocalDate.now())) {
+            throw new BusinessException(
+                    "O médico deve ter pelo menos 18 anos.");
+        }
+
+        return true;
     }
 }
