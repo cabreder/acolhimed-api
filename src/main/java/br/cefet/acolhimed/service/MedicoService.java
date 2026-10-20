@@ -129,7 +129,6 @@ public class MedicoService {
             throw new BusinessException("Já existe um usuário com esse CPF.");
         }
 
-        validarDataNascimento(dto);
 
         medico.setNome(dto.getNome());
         medico.setEmail(dto.getEmail());

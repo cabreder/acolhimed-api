@@ -79,8 +79,6 @@ public class PacienteService {
             throw new BusinessException("Já existe um usuário com esse CPF.");
         }
 
-        validarDataNascimento(dto);
-
         paciente.setNome(dto.getNome());
         paciente.setEmail(dto.getEmail());
         paciente.setDataNascimento(dto.getDataNascimento());
