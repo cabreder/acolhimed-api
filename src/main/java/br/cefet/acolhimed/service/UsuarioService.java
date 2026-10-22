@@ -71,6 +71,7 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public DashBoardDTO getDashBoard() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         UserDetails user = (UserDetails) authentication.getPrincipal();
         String idUsuario = user.getUsername();
 
@@ -85,22 +86,25 @@ public class UsuarioService {
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Médico não encontrado. Id: " + idUsuario));
 
-            dashBoard.setTotalPacientesAtendidos(consultaService.contarConsultasDoDia(medico));
+            dashBoard.setTotalconsultasHoje(consultaService.contarConsultasDoDia(medico));
 
-            dashBoard.setTotalPacientesAtendidos(consultaService.contarPacientesAtendidos(medico));
+            dashBoard.setTotalPacientesAtendidos(
+                    consultaService.contarPacientesAtendidos(medico));
 
-            dashBoard.setConsultaEmAndamento(consultaService.buscarConsultaEmAndamento());
+            dashBoard.setConsultaEmAndamento(
+                    consultaService.buscarConsultaEmAndamento());
 
         } else {
-            
             dashBoard.setTotalMedicos(medicoService.contarMedicos());
 
-            dashBoard.setTotalEspecialidades(especialidadeService.contarEspecialidades());
+            dashBoard.setTotalEspecialidades(
+                    especialidadeService.contarEspecialidades());
 
-            dashBoard.setConsultaEmAndamento(consultaService.buscarConsultaEmAndamento());
+            dashBoard.setConsultaEmAndamento(
+                    consultaService.buscarConsultaEmAndamento());
         }
 
-        return new DashBoardDTO(dashBoard);
+        return dashBoard;
     }
 
     @Transactional(readOnly = true)

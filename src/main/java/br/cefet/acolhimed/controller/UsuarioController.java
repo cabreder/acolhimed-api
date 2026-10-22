@@ -20,7 +20,6 @@ import br.cefet.acolhimed.dto.DashBoardDTO;
 import br.cefet.acolhimed.dto.LoginRequestDTO;
 import br.cefet.acolhimed.dto.UsuarioResponseDTO;
 
-
 @RestController
 @RequestMapping("/usuarios")
 @Tag(name = "Usuario")
@@ -29,10 +28,9 @@ public class UsuarioController {
     @Autowired
     private UsuarioService UsuarioService;
 
-     @GetMapping("/dashBoard")
-    @Operation(summary = "Retonar dados da página inicial")
+    @GetMapping("/dashBoard")
+    @Operation(summary = "Retornar dados da página inicial")
     public ResponseEntity<DashBoardDTO> getDashBoard() {
-
         DashBoardDTO dashBoard = UsuarioService.getDashBoard();
         return ResponseEntity.ok(dashBoard);
     }

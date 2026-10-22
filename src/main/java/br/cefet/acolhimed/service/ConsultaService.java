@@ -129,7 +129,7 @@ public class ConsultaService {
     @Transactional(readOnly = true)
     public long contarPacientesAtendidos(Medico medico) {
         return consultaRepository.countByMedicoAndStatus(
-                medico, "finalizada");
+                medico, StatusConsulta.finalizada);
     }
 
     @Transactional(readOnly = true)
