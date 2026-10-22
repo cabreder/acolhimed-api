@@ -36,6 +36,12 @@ public interface ConsultaRepository extends JpaRepository<Consulta, String> {
                         LocalDateTime fim,
                         StatusConsulta status);
 
+        Optional<Consulta> findFirstByMedicoIdAndDataHoraBetweenAndStatus(
+                        String medicoId,
+                        LocalDateTime inicio,
+                        LocalDateTime fim,
+                        StatusConsulta status);
+
         boolean existsByMedicoAndDataHoraAndStatusNot(Medico medico, LocalDateTime dataHora, StatusConsulta status);
 
         boolean existsByMedicoAndDataHoraAndStatusNotAndIdNot(

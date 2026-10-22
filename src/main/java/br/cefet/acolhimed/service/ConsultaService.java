@@ -19,6 +19,7 @@ import br.cefet.acolhimed.entity.Medico;
 import br.cefet.acolhimed.entity.Paciente;
 import br.cefet.acolhimed.enums.StatusConsulta;
 import br.cefet.acolhimed.enums.TipoNotificacao;
+import br.cefet.acolhimed.enums.TipoUsuario;
 import br.cefet.acolhimed.exception.BusinessException;
 import br.cefet.acolhimed.exception.ResourceNotFoundException;
 import br.cefet.acolhimed.repository.ConsultaRepository;
@@ -148,7 +149,7 @@ public class ConsultaService {
     }
 
     @Transactional(readOnly = true)
-    public ConsultaResponseDTO buscarConsultaEmAndamento() {
+    public ConsultaResponseDTO buscarConsultaEmAndamento(TipoUsuario tipoUsuario) {
 
         String usuarioId = obterIdUsuarioAutenticado();
 
@@ -158,15 +159,34 @@ public class ConsultaService {
         LocalDateTime inicio = agora.minusMinutes(30);
         LocalDateTime fim = agora.plusMinutes(15);
 
-        Consulta consulta = consultaRepository
-                .findFirstByPacienteIdAndDataHoraBetweenAndStatus(
-                        usuarioId,
-                        inicio,
-                        fim,
-                        StatusConsulta.agendada)
-                .orElse(null);
+        if (tipoUsuario.equals(TipoUsuario.medico)) {
+            Consulta consulta = consultaRepository
+                    .findFirstByMedicoIdAndDataHoraBetweenAndStatus(
+                            usuarioId,
+                            inicio,
+                            fim,
+                            StatusConsulta.agendada)
+                    .orElse(null);
+            if (consulta == null) {
+                return null;
+            }else{
+                return montarDTO(consulta);
+            }
+        } else {
+            Consulta consulta = consultaRepository
+                    .findFirstByPacienteIdAndDataHoraBetweenAndStatus(
+                            usuarioId,
+                            inicio,
+                            fim,
+                            StatusConsulta.agendada)
+                    .orElse(null);
+            if (consulta == null) {
+                return null;
+            }else{
+                return montarDTO(consulta);
+            }
+        }
 
-        return montarDTO(consulta);
     }
 
     @Transactional

@@ -92,7 +92,7 @@ public class UsuarioService {
                     consultaService.contarPacientesAtendidos(medico));
 
             dashBoard.setConsultaEmAndamento(
-                    consultaService.buscarConsultaEmAndamento());
+                    consultaService.buscarConsultaEmAndamento(medico.getTipoUsuario()));
 
         } else {
             dashBoard.setTotalMedicos(medicoService.contarMedicos());
@@ -101,7 +101,7 @@ public class UsuarioService {
                     especialidadeService.contarEspecialidades());
 
             dashBoard.setConsultaEmAndamento(
-                    consultaService.buscarConsultaEmAndamento());
+                    consultaService.buscarConsultaEmAndamento(usuario.getTipoUsuario()));
         }
 
         return dashBoard;
