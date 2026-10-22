@@ -10,12 +10,12 @@ import lombok.Getter;
 public class ConsultaResponseDTO {
     private String id;
     private String motivoCancelamento;
-    private PacienteResponseDTO paciente;
-    private MedicoResponseDTO medico;
+    private String medicoId;
+    private String medicoFoto;
+    private String pacienteFoto;
     private LocalDateTime dataHora;
     private String pacienteNome;
     private String medicoNome;
-    private String especialidadeId;
     private String especialidadeNome;
     private StatusConsulta status;
     private String linkConsulta;
@@ -31,12 +31,12 @@ public class ConsultaResponseDTO {
     public ConsultaResponseDTO(Consulta consulta, MedicoResponseDTO medicoDTO, Boolean possuiAvaliacao, Boolean possuiPrescricao) {
     this.id = consulta.getId();
     this.motivoCancelamento = consulta.getMotivoCancelamento();
-    this.paciente = new PacienteResponseDTO(consulta.getPaciente());
-    this.medico = medicoDTO;
     this.dataHora = consulta.getDataHora();
     this.pacienteNome = consulta.getPaciente().getNome();
     this.medicoNome = consulta.getMedico().getNome();
-    this.especialidadeId = consulta.getEspecialidade().getId();
+    this.medicoId = consulta.getMedico().getId();
+    this.medicoFoto = consulta.getMedico().getFoto();
+    this.pacienteFoto = consulta.getPaciente().getFoto();
     this.especialidadeNome = consulta.getEspecialidade().getNome();
     this.status = consulta.getStatus();
     this.linkConsulta = consulta.getLinkConsulta();

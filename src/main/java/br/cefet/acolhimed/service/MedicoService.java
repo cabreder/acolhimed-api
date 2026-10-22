@@ -12,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.cefet.acolhimed.dto.EspecialidadeResponseDTO;
 import br.cefet.acolhimed.dto.MedicoRequestDTO;
 import br.cefet.acolhimed.dto.MedicoResponseDTO;
 import br.cefet.acolhimed.entity.Medico;
@@ -120,6 +119,7 @@ public class MedicoService {
             throw new BusinessException("Já existe um usuário com esse e-mail.");
         }
 
+        validarDataNascimento(dto);
         // Busca se alguem usa o cpf
         Optional<Medico> usuarioComMesmoCpf = MedicoRepository.findByCpf(dto.getCpf());
 
@@ -128,6 +128,8 @@ public class MedicoService {
         if (usuarioComMesmoCpf.isPresent() && !usuarioComMesmoCpf.get().getId().equals(medicoId)) {
             throw new BusinessException("Já existe um usuário com esse CPF.");
         }
+
+        
 
 
         medico.setNome(dto.getNome());
