@@ -20,58 +20,8 @@ INSERT INTO tb_medicos_especialidades (id, medico_id, especialidade_id) VALUES (
 
 INSERT INTO tb_horarios(id, medico_id, dia, manha, tarde, noite) VALUES ('11111111-1111-1111-1111-111111111111', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', 'segunda', true, false, true);
 
-INSERT INTO tb_consultas (
-    id,
-    data_hora,
-    motivo_cancelamento,
-    observacoes,
-    link_consulta,
-    status,
-    paciente_id,
-    medico_id,
-    especialidade_id
-) VALUES
-(
-    'consulta-teste-001',
-    '2026-10-10T14:00:00',
-    NULL,
-    'Paciente relatou melhora dos sintomas.',
-    'https://meet.google.com/abc-defg-hij',
-    'finalizada',
-    '4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21',
-    'bdfc1043-b7bc-413b-8a11-80348a9936a4',
-    'e1000000-0000-0000-0000-000000000007'
-),
-(
-    'consulta-teste-002',
-    '2026-10-12T10:30:00',
-    NULL,
-    'Consulta de acompanhamento.',
-    'https://meet.google.com/klm-nopq-rst',
-    'finalizada',
-    '4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21',
-    'bdfc1043-b7bc-413b-8a11-80348a9936a4',
-    'e1000000-0000-0000-0000-000000000007'
-);
+INSERT INTO tb_consultas (id, data_hora, motivo_cancelamento, observacoes, link_consulta, status, paciente_id, medico_id, especialidade_id) VALUES ('consulta-teste-001', '2026-10-10T14:00:00', '', 'Paciente relatou melhora dos sintomas.', 'https://meet.google.com/abc-defg-hij', 'finalizada', '4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', 'e1000000-0000-0000-0000-000000000007');
+INSERT INTO tb_consultas (id, data_hora, motivo_cancelamento, observacoes, link_consulta, status, paciente_id, medico_id, especialidade_id) VALUES ('consulta-teste-002', '2026-10-12T10:30:00', '', 'Consulta de acompanhamento.', 'https://meet.google.com/klm-nopq-rst', 'finalizada', '4d2e8b1c-9a3f-4e6c-b715-2d83fa096e21', 'bdfc1043-b7bc-413b-8a11-80348a9936a4', 'e1000000-0000-0000-0000-000000000007');
 
--- 2. Duas avaliações, uma para cada consulta
-INSERT INTO tb_avaliacoes (
-    id,
-    comentario,
-    nota,
-    data,
-    consulta_id
-) VALUES
-(
-    'avaliacao-teste-001',
-    'Excelente atendimento, médico muito atencioso e esclareceu todas as minhas dúvidas.',
-    5.0,
-    '2026-10-10T14:45:00',
-    'consulta-teste-001'
-),(
-    'avaliacao-teste-002',
-    'Bom atendimento, explicou o tratamento com clareza e demonstrou profissionalismo.',
-    4.0,
-    '2026-10-12T11:15:00',
-    'consulta-teste-002'
-);
+INSERT INTO tb_avaliacoes (id, comentario, nota, data, consulta_id) VALUES ('avaliacao-teste-001', 'Excelente atendimento, médico muito atencioso e esclareceu todas as minhas dúvidas.', 5.0, '2026-10-10T14:45:00', 'consulta-teste-001');
+INSERT INTO tb_avaliacoes (id, comentario, nota, data, consulta_id) VALUES ('avaliacao-teste-002', 'Bom atendimento, explicou o tratamento com clareza e demonstrou profissionalismo.', 4.0, '2026-10-12T11:15:00', 'consulta-teste-002');

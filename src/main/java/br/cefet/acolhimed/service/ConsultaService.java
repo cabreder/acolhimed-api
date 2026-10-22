@@ -164,8 +164,7 @@ public class ConsultaService {
                         inicio,
                         fim,
                         StatusConsulta.agendada)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Nenhuma consulta em andamento."));
+                .orElse(null);
 
         return montarDTO(consulta);
     }
