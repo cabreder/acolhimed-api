@@ -6,24 +6,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.cefet.acolhimed.dto.AutenticacaoResponseDTO;
+import br.cefet.acolhimed.dto.ConsultaResponseDTO;
+import br.cefet.acolhimed.dto.DashBoardDTO;
 import br.cefet.acolhimed.dto.LoginRequestDTO;
 import br.cefet.acolhimed.dto.MedicoResponseDTO;
+import br.cefet.acolhimed.dto.PacienteRequestDTO;
 import br.cefet.acolhimed.dto.UsuarioResponseDTO;
 import br.cefet.acolhimed.entity.Medico;
+import br.cefet.acolhimed.entity.Paciente;
 import br.cefet.acolhimed.entity.Usuario;
+import br.cefet.acolhimed.enums.TipoUsuario;
 import br.cefet.acolhimed.exception.ResourceNotFoundException;
 import br.cefet.acolhimed.repository.AvaliacaoRepository;
+import br.cefet.acolhimed.repository.MedicoRepository;
+import br.cefet.acolhimed.repository.PacienteRepository;
 import br.cefet.acolhimed.repository.UsuarioRepository;
 import br.cefet.acolhimed.security.JwtService;
 
 @Service
 public class UsuarioService {
 
-    @Autowired  
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
     @Autowired
@@ -35,12 +45,62 @@ public class UsuarioService {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private MedicoService medicoService;
+
+    @Autowired
+    private ConsultaService consultaService;
+
+    @Autowired
+    private EspecialidadeService especialidadeService;
+
+    @Autowired
+    private PacienteRepository pacienteRepository;
+
+    @Autowired
+    private MedicoRepository medicoRepository;
+
     @Transactional(readOnly = true)
     public List<UsuarioResponseDTO> listar() {
         return usuarioRepository.findAll()
                 .stream()
                 .map(UsuarioResponseDTO::new)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public DashBoardDTO getDashBoard() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails user = (UserDetails) authentication.getPrincipal();
+        String idUsuario = user.getUsername();
+
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Usuário não encontrado. Id: " + idUsuario));
+
+        DashBoardDTO dashBoard = new DashBoardDTO();
+
+        if (usuario.getTipoUsuario() == TipoUsuario.medico) {
+            Medico medico = medicoRepository.findById(idUsuario)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Médico não encontrado. Id: " + idUsuario));
+
+            dashBoard.setTotalPacientesAtendidos(consultaService.contarConsultasDoDia(medico));
+
+            dashBoard.setTotalPacientesAtendidos(consultaService.contarPacientesAtendidos(medico));
+
+            dashBoard.setConsultaEmAndamento(consultaService.buscarConsultaEmAndamento());
+
+        } else {
+            
+            dashBoard.setTotalMedicos(medicoService.contarMedicos());
+
+            dashBoard.setTotalEspecialidades(especialidadeService.contarEspecialidades());
+
+            dashBoard.setConsultaEmAndamento(consultaService.buscarConsultaEmAndamento());
+        }
+
+        return new DashBoardDTO(dashBoard);
     }
 
     @Transactional(readOnly = true)

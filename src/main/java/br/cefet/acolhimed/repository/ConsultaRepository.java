@@ -14,6 +14,13 @@ import br.cefet.acolhimed.enums.StatusConsulta;
 public interface ConsultaRepository extends JpaRepository<Consulta, String> {
         Optional<Consulta> findByPaciente(Paciente paciente);
 
+        long countByMedicoAndStatus(Medico medico, String status);
+
+        long countByMedicoAndDataHoraBetween(
+                        Medico medico,
+                        LocalDateTime inicioDoDia,
+                        LocalDateTime fimDoDia);
+
         Optional<Consulta> findByMedico(Medico medico);
 
         List<Consulta> findByMedicoOrPaciente(Medico medico, Paciente paciente);

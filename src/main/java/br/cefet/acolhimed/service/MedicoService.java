@@ -44,6 +44,11 @@ public class MedicoService {
     }
 
     @Transactional(readOnly = true)
+    public long contarMedicos() {
+        return MedicoRepository.count();
+    }
+
+    @Transactional(readOnly = true)
     public List<MedicoResponseDTO> listar() {
         return MedicoRepository.findAll()
                 .stream()
@@ -129,9 +134,6 @@ public class MedicoService {
             throw new BusinessException("Já existe um usuário com esse CPF.");
         }
 
-        
-
-
         medico.setNome(dto.getNome());
         medico.setEmail(dto.getEmail());
         medico.setDataNascimento(dto.getDataNascimento());
@@ -149,8 +151,8 @@ public class MedicoService {
         return montarDTO(MedicoRepository.save(medico));
     }
 
-    private boolean validarDataNascimento(MedicoRequestDTO dto){
-         if (dto.getDataNascimento() == null) {
+    private boolean validarDataNascimento(MedicoRequestDTO dto) {
+        if (dto.getDataNascimento() == null) {
             throw new BusinessException("A data de nascimento é obrigatória.");
         }
 

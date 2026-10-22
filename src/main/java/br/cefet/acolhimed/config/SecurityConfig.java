@@ -64,6 +64,7 @@ public class SecurityConfig {
 
 			// Usuários
 			.requestMatchers(HttpMethod.GET, "/usuarios/{id}").hasAnyAuthority("paciente", "medico")
+			.requestMatchers(HttpMethod.GET, "/usuarios/dashBoard").hasAnyAuthority("paciente", "medico")
 
 			// Pacientes
 			.requestMatchers(HttpMethod.PUT, "/pacientes").hasAuthority("paciente")

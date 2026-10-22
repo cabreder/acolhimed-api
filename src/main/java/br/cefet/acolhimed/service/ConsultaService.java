@@ -90,7 +90,7 @@ public class ConsultaService {
     @Transactional(readOnly = true)
     public List<ConsultaResponseDTO> listarAgendaDoDia() {
 
-        String medicoId =  obterIdUsuarioAutenticado();
+        String medicoId = obterIdUsuarioAutenticado();
 
         Medico medico = medicoRepository.findById(medicoId).orElse(null);
 
@@ -114,12 +114,30 @@ public class ConsultaService {
                 .toList();
     }
 
+    public long contarConsultasDoDia(Medico medico) {
+        LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+
+        LocalDateTime inicioDoDia = hoje.atStartOfDay();
+        LocalDateTime fimDoDia = hoje.atTime(LocalTime.MAX);
+
+        return consultaRepository.countByMedicoAndDataHoraBetween(
+                medico,
+                inicioDoDia,
+                fimDoDia);
+    }
+
+    @Transactional(readOnly = true)
+    public long contarPacientesAtendidos(Medico medico) {
+        return consultaRepository.countByMedicoAndStatus(
+                medico, "finalizada");
+    }
+
     @Transactional(readOnly = true)
     public ConsultaResponseDTO buscarPorId(String id) {
         Consulta consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Consulta não encontrada. Id: " + id));
 
-        String usuarioId =  obterIdUsuarioAutenticado();
+        String usuarioId = obterIdUsuarioAutenticado();
 
         if (!usuarioId.equals(consulta.getPaciente().getId()) && !usuarioId.equals(consulta.getMedico().getId())) {
             throw new BusinessException(
@@ -132,7 +150,7 @@ public class ConsultaService {
     @Transactional(readOnly = true)
     public ConsultaResponseDTO buscarConsultaEmAndamento() {
 
-        String usuarioId =  obterIdUsuarioAutenticado();
+        String usuarioId = obterIdUsuarioAutenticado();
 
         LocalDateTime agora = LocalDateTime.now(
                 ZoneId.of("America/Sao_Paulo"));
@@ -158,7 +176,7 @@ public class ConsultaService {
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Médico não encontrado. Id: " + dto.getMedicoId()));
 
-        String pacienteId =  obterIdUsuarioAutenticado();
+        String pacienteId = obterIdUsuarioAutenticado();
 
         Paciente paciente = pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -212,7 +230,7 @@ public class ConsultaService {
 
         UserDetails usuario = (UserDetails) authentication.getPrincipal();
 
-        String usuarioId =  obterIdUsuarioAutenticado();
+        String usuarioId = obterIdUsuarioAutenticado();
 
         String tipoUsuario = usuario.getAuthorities()
                 .iterator()
@@ -266,7 +284,7 @@ public class ConsultaService {
 
         Consulta consulta = buscarConsulta(id);
 
-        String usuarioId =  obterIdUsuarioAutenticado();
+        String usuarioId = obterIdUsuarioAutenticado();
 
         if (!usuarioId.equals(consulta.getPaciente().getId()) && !usuarioId.equals(consulta.getMedico().getId())) {
             throw new BusinessException(

@@ -31,4 +31,9 @@ public class EspecialidadeService {
         return new EspecialidadeResponseDTO(especialidade);
     }
 
+    @Transactional(readOnly = true)
+    public long contarEspecialidades() {
+        return especialidadeRepository.count();
+    }
+
 }
