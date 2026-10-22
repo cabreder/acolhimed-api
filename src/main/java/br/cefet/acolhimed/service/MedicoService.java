@@ -1,7 +1,6 @@
 package br.cefet.acolhimed.service;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +39,10 @@ public class MedicoService {
 
     public MedicoResponseDTO montarDTO(Medico medico) {
         Double media = avaliacaoRepository.calcularMediaAvaliacao(medico.getId());
+        return montarDTO(medico, media);
+    }
+
+    private MedicoResponseDTO montarDTO(Medico medico, Double media) {
         return new MedicoResponseDTO(medico, media);
     }
 
@@ -58,22 +61,11 @@ public class MedicoService {
 
     @Transactional(readOnly = true)
     public List<MedicoResponseDTO> listarMedicosBemAvaliados() {
-
-        List<Medico> medicos = MedicoRepository.findAll();
-
-        return medicos.stream()
-                .map(medico -> {
-                    Double media = avaliacaoRepository
-                            .calcularMediaAvaliacao(medico.getId());
-
-                    return new MedicoResponseDTO(medico, media);
-                })
-                .filter(medico -> medico.getMediaAvaliacao() != null
-                        && medico.getMediaAvaliacao() >= 4.0)
-                .sorted(
-                        Comparator.comparing(
-                                MedicoResponseDTO::getMediaAvaliacao,
-                                Comparator.reverseOrder()))
+        return MedicoRepository.buscarMedicosBemAvaliados()
+                .stream()
+                .map(resultado -> montarDTO(
+                        (Medico) resultado[0],
+                        ((Number) resultado[1]).doubleValue()))
                 .limit(20)
                 .toList();
     }

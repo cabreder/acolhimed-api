@@ -25,3 +25,8 @@ INSERT INTO tb_consultas (id, data_hora, motivo_cancelamento, observacoes, link_
 
 INSERT INTO tb_avaliacoes (id, comentario, nota, data, consulta_id) VALUES ('avaliacao-teste-001', 'Excelente atendimento, médico muito atencioso e esclareceu todas as minhas dúvidas.', 5.0, '2026-10-10T14:45:00', 'consulta-teste-001');
 INSERT INTO tb_avaliacoes (id, comentario, nota, data, consulta_id) VALUES ('avaliacao-teste-002', 'Bom atendimento, explicou o tratamento com clareza e demonstrou profissionalismo.', 4.0, '2026-10-12T11:15:00', 'consulta-teste-002');
+
+CREATE INDEX idx_consultas_paciente ON tb_consultas(paciente_id);
+CREATE INDEX idx_consultas_medico ON tb_consultas(medico_id);
+CREATE INDEX idx_consultas_data_status ON tb_consultas(data_hora, status);
+CREATE INDEX idx_avaliacoes_consulta ON tb_avaliacoes(consulta_id);
