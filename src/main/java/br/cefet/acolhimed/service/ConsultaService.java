@@ -149,6 +149,19 @@ public class ConsultaService {
     }
 
     @Transactional(readOnly = true)
+    public ConsultaResponseDTO buscarConsultaEmAndamento() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails usuario = (UserDetails) authentication.getPrincipal();
+
+        String autoridade = usuario.getAuthorities().stream()
+                .map(autority -> autority.getAuthority())
+                .findFirst()
+                .orElseThrow(() -> new BusinessException("Tipo de usuário não identificado."));
+
+        return buscarConsultaEmAndamento(TipoUsuario.valueOf(autoridade));
+    }
+
+    @Transactional(readOnly = true)
     public ConsultaResponseDTO buscarConsultaEmAndamento(TipoUsuario tipoUsuario) {
 
         String usuarioId = obterIdUsuarioAutenticado();
